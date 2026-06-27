@@ -10,270 +10,242 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --void:    #080b12;
-  --surface: #0e1420;
-  --surface2:#131926;
-  --edge:    #1e2640;
-  --text:    #e8eaf2;
-  --muted:   #4a5580;
-  --muted2:  #2a3050;
-  --rose:    #f0a090;
-  --rose-dim: rgba(240,160,144,0.15);
-  --cyan:    #38bdf8;
-  --cyan-dim: rgba(56,189,248,0.1);
-  --amber:   #fbbf24;
-  --danger:  #ef4444;
-  --green:   #34d399;
+:root{
+  --void:#080b12;--surface:#0e1420;--surface2:#131926;--edge:#1e2640;
+  --text:#e8eaf2;--muted:#4a5580;--muted2:#2a3050;
+  --rose:#f0a090;--rose-dim:rgba(240,160,144,0.15);
+  --cyan:#38bdf8;--cyan-dim:rgba(56,189,248,0.12);
+  --amber:#fbbf24;--danger:#ef4444;--green:#34d399;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{width:100%;height:100%;overflow:hidden;background:var(--void);font-family:'Inter',sans-serif;color:var(--text)}
 
-/* ═══ SCREENS ═══ */
-.screen{position:fixed;inset:0;bottom:60px;overflow:hidden;display:none;flex-direction:column}
+/* ── SCREENS ── */
+.screen{position:fixed;top:0;left:0;right:0;bottom:60px;display:none;flex-direction:column;overflow:hidden}
 .screen.active{display:flex}
 
-/* ═══ NAV ═══ */
-#nav{position:fixed;bottom:0;left:0;right:0;height:60px;background:var(--surface);border-top:1px solid var(--edge);display:flex;z-index:1000;padding-bottom:env(safe-area-inset-bottom,0)}
-.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;transition:color 0.2s;padding:8px 0}
+/* ── NAV ── */
+#nav{position:fixed;bottom:0;left:0;right:0;height:60px;background:var(--surface);border-top:1px solid var(--edge);display:flex;z-index:1000}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:none;border:none;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;transition:color 0.2s;padding:8px 0 10px}
 .nav-btn.active{color:var(--rose)}
-.nav-icon{font-size:18px;line-height:1}
+.nav-icon{font-size:20px;line-height:1}
 .nav-label{font-size:9px;font-weight:600;letter-spacing:1px;text-transform:uppercase}
-.nav-btn.active .nav-label{color:var(--rose)}
 
-/* ═══ LOADING ═══ */
-#loading{position:fixed;inset:0;z-index:9999;background:var(--void);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
-.load-logo{font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;color:var(--text);letter-spacing:3px}
+/* ── LOADING ── */
+#loading{position:fixed;inset:0;z-index:9999;background:var(--void);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:40px}
+.load-logo{font-family:'Space Grotesk',sans-serif;font-size:34px;font-weight:700;color:var(--text);letter-spacing:3px}
 .load-logo span{color:var(--rose)}
 .load-sub{font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--muted)}
-.spinner{width:36px;height:36px;border:2px solid var(--edge);border-top-color:var(--rose);border-radius:50%;animation:spin 0.8s linear infinite;margin-top:8px}
+.spinner{width:36px;height:36px;border:2px solid var(--edge);border-top-color:var(--rose);border-radius:50%;animation:spin 0.8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.load-err{text-align:center;max-width:280px}
-.load-err-icon{font-size:40px;margin-bottom:12px}
-.load-err-title{font-size:16px;font-weight:700;margin-bottom:6px;color:var(--rose)}
-.load-err-msg{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:16px}
-.btn-primary{padding:10px 28px;background:var(--rose);color:var(--void);border:none;border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:0.5px}
+.err-icon{font-size:44px;margin-bottom:4px}
+.err-title{font-size:17px;font-weight:700;color:var(--rose)}
+.err-msg{font-size:12px;color:var(--muted);line-height:1.6;max-width:260px}
+.btn-primary{margin-top:6px;padding:11px 30px;background:var(--rose);color:var(--void);border:none;border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;cursor:pointer}
 
-/* ═══ COMMON COMPONENTS ═══ */
-.card{background:var(--surface);border:1px solid var(--edge);border-radius:14px;overflow:hidden}
-.section-label{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);padding:0 16px;margin-bottom:8px}
-.pill{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border:1px solid var(--edge);background:var(--surface2);color:var(--muted);cursor:pointer;transition:all 0.2s;white-space:nowrap;font-family:'Inter',sans-serif}
-.pill.active{background:var(--rose-dim);border-color:var(--rose);color:var(--rose)}
-.pill.cyan.active{background:var(--cyan-dim);border-color:var(--cyan);color:var(--cyan)}
-.live-dot{width:5px;height:5px;border-radius:50%;background:var(--cyan);animation:livepulse 1.5s ease-in-out infinite}
-@keyframes livepulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(1.5)}}
-.rose-dot{background:var(--rose)}
+/* ── SHARED ── */
+.card{background:var(--surface);border:1px solid var(--edge);border-radius:14px}
+.sec-label{font-size:9px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--muted);padding:0 16px;margin-bottom:8px}
+.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--cyan);animation:lp 1.5s ease-in-out infinite}
+@keyframes lp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(1.6)}}
 
-/* ═══ HOME SCREEN ═══ */
-#home{background:var(--void);overflow-y:auto;padding-top:env(safe-area-inset-top,0)}
-.home-header{padding:20px 16px 16px;display:flex;align-items:flex-start;justify-content:space-between}
-.home-loc{display:flex;align-items:center;gap:7px;margin-bottom:4px}
-.loc-indicator{width:6px;height:6px;border-radius:50%;background:var(--rose);box-shadow:0 0 8px var(--rose);animation:livepulse 2s ease-in-out infinite}
-.loc-name{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:600;color:var(--rose)}
-.loc-time{font-size:10px;color:var(--muted);letter-spacing:0.5px}
-.home-temp-block{text-align:right}
-.home-temp{font-family:'JetBrains Mono',monospace;font-size:56px;font-weight:600;line-height:1;color:var(--text)}
-.home-temp-unit{font-size:20px;color:var(--muted);font-weight:400}
-.home-condition{font-size:11px;color:var(--muted);margin-top:3px}
+/* ── HOME ── */
+#home{overflow-y:auto;-webkit-overflow-scrolling:touch}
+.home-inner{display:flex;flex-direction:column;padding-bottom:16px}
 
-/* context banner */
-.context-banner{margin:0 16px 12px;padding:12px 14px;background:var(--surface);border:1px solid var(--edge);border-radius:12px;display:flex;align-items:center;gap:10px}
-.ctx-icon{font-size:22px;flex-shrink:0}
-.ctx-text{font-size:12px;line-height:1.5;color:var(--text)}
-.ctx-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
-
-/* threat strip */
-.threat-strip{margin:0 16px 12px;padding:10px 14px;border-radius:10px;display:flex;align-items:center;gap:10px;border:1px solid transparent;transition:all 0.4s}
-.threat-strip.none{background:rgba(52,211,153,0.06);border-color:rgba(52,211,153,0.15)}
-.threat-strip.low{background:rgba(251,191,36,0.06);border-color:rgba(251,191,36,0.2)}
-.threat-strip.medium{background:rgba(240,160,144,0.08);border-color:rgba(240,160,144,0.25)}
-.threat-strip.high{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.35);animation:threatpulse 2s ease-in-out infinite}
-.threat-strip.extreme{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.6);animation:threatpulse 1s ease-in-out infinite}
-@keyframes threatpulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 16px rgba(239,68,68,0.25)}}
-.threat-emoji{font-size:20px;flex-shrink:0}
-.threat-title{font-size:12px;font-weight:700}
-.threat-strip.none .threat-title{color:var(--green)}
-.threat-strip.low .threat-title{color:var(--amber)}
-.threat-strip.medium .threat-title{color:var(--rose)}
-.threat-strip.high .threat-title,.threat-strip.extreme .threat-title{color:var(--danger)}
-.threat-desc{font-size:10px;color:var(--muted);margin-top:2px}
-
-/* quick stats */
-.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 16px;margin-bottom:12px}
-.qs-card{background:var(--surface);border:1px solid var(--edge);border-radius:12px;padding:12px 8px;text-align:center}
-.qs-icon{font-size:15px;margin-bottom:6px}
-.qs-val{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;color:var(--text);line-height:1}
-.qs-unit{font-size:8px;color:var(--muted)}
-.qs-label{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-top:4px}
-
-/* quick panels */
-.panels-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 16px;margin-bottom:12px}
-.panel-btn{background:var(--surface);border:1px solid var(--edge);border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;transition:all 0.2s;border:1px solid var(--edge)}
-.panel-btn:active{background:var(--surface2);transform:scale(0.97)}
-.panel-btn.highlight{border-color:var(--rose-dim);border-color:rgba(240,160,144,0.3)}
-.pb-icon{font-size:22px;margin-bottom:6px}
-.pb-label{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
-
-/* hourly */
-.hourly-scroll{overflow-x:auto;padding:0 16px 4px;margin-bottom:12px;scrollbar-width:none}
-.hourly-scroll::-webkit-scrollbar{display:none}
-.hourly-track{display:flex;gap:6px;width:max-content}
-.h-card{background:var(--surface);border:1px solid var(--edge);border-radius:12px;padding:10px 8px;text-align:center;min-width:56px}
-.h-card.now{border-color:rgba(240,160,144,0.4);background:rgba(240,160,144,0.06)}
-.h-card.storm{border-color:rgba(239,68,68,0.4);background:rgba(239,68,68,0.05)}
-.h-card.rain{border-color:rgba(56,189,248,0.3)}
-.h-time{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:0.5px;margin-bottom:5px}
-.h-icon{font-size:16px;margin-bottom:4px}
-.h-temp{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600}
-.h-rain{font-size:9px;color:var(--cyan);margin-top:3px}
-.now-pip{width:4px;height:4px;border-radius:50%;background:var(--rose);margin:0 auto 3px}
-
-/* 7 day */
-.daily-list{padding:0 16px;margin-bottom:16px;display:flex;flex-direction:column;gap:5px}
-.day-row{background:var(--surface);border:1px solid var(--edge);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px}
-.day-row.storm-day{border-color:rgba(239,68,68,0.3)}
-.day-row.rain-day{border-color:rgba(56,189,248,0.2)}
-.day-name{font-size:12px;font-weight:600;width:36px;flex-shrink:0}
-.day-icon{font-size:18px;flex-shrink:0}
-.day-desc{font-size:11px;color:var(--muted);flex:1}
-.day-precip{font-size:10px;font-weight:700;color:var(--cyan);width:36px;text-align:center;flex-shrink:0}
-.day-precip.dry{color:var(--muted)}
-.day-temps{font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right;flex-shrink:0}
-.day-hi{color:var(--text);font-weight:600}
-.day-lo{color:var(--muted)}
-
-/* collapsible */
-.collapsible-header{display:flex;align-items:center;justify-content:space-between;padding:0 16px;margin-bottom:8px;cursor:pointer;user-select:none}
-.collapsible-header .section-label{padding:0;margin:0}
-.collapse-arrow{font-size:12px;color:var(--muted);transition:transform 0.3s}
-.collapse-arrow.open{transform:rotate(180deg)}
-.collapsible-body{overflow:hidden;transition:max-height 0.35s ease,opacity 0.35s ease;max-height:500px;opacity:1}
-.collapsible-body.closed{max-height:0;opacity:0}
-
-/* unit toggle home */
-.unit-row{display:flex;align-items:center;justify-content:flex-end;padding:0 16px;margin-bottom:10px;gap:6px}
+.unit-row{display:flex;justify-content:flex-end;padding:14px 16px 0}
 .unit-toggle{display:flex;background:var(--surface);border:1px solid var(--edge);border-radius:20px;overflow:hidden}
-.u-btn{padding:5px 14px;font-size:10px;font-weight:700;letter-spacing:0.5px;color:var(--muted);background:transparent;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s}
+.u-btn{padding:6px 16px;font-size:10px;font-weight:700;color:var(--muted);background:transparent;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s}
 .u-btn.active{background:var(--rose);color:var(--void)}
 
-/* ═══ MAP SCREEN ═══ */
-#map-screen{background:var(--void)}
-#leaflet-map{flex:1;position:relative}
-#leaflet-map > div{height:100%!important}
-.map-ui{position:absolute;left:0;right:0;z-index:500;pointer-events:none}
-.map-ui-top{top:0;padding:12px}
-.map-ui-bottom{bottom:0;padding:12px}
-.map-ui *{pointer-events:auto}
+.home-hero{padding:14px 16px 12px;display:flex;align-items:flex-start;justify-content:space-between}
+.hero-left{}
+.loc-row{display:flex;align-items:center;gap:7px;margin-bottom:3px}
+.loc-dot{width:7px;height:7px;border-radius:50%;background:var(--rose);box-shadow:0 0 8px var(--rose);animation:lp 2s ease-in-out infinite}
+.loc-name{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:600;color:var(--rose)}
+.loc-time{font-size:10px;color:var(--muted)}
+.hero-right{text-align:right}
+.hero-temp{font-family:'JetBrains Mono',monospace;font-size:60px;font-weight:600;line-height:1;color:var(--text)}
+.hero-temp-unit{font-size:22px;color:var(--muted);font-weight:400}
+.hero-cond{font-size:11px;color:var(--muted);margin-top:3px}
+
+.ctx-banner{margin:0 16px 10px;padding:13px 14px;background:var(--surface);border:1px solid var(--edge);border-radius:12px;display:flex;align-items:flex-start;gap:10px}
+.ctx-icon{font-size:22px;flex-shrink:0;margin-top:1px}
+.ctx-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.ctx-text{font-size:12px;line-height:1.55;color:var(--text)}
+
+.threat-strip{margin:0 16px 10px;padding:11px 14px;border-radius:10px;display:flex;align-items:center;gap:10px;border:1px solid transparent;transition:all 0.4s}
+.threat-strip.none{background:rgba(52,211,153,0.06);border-color:rgba(52,211,153,0.15)}
+.threat-strip.low{background:rgba(251,191,36,0.06);border-color:rgba(251,191,36,0.2)}
+.threat-strip.medium{background:rgba(240,160,144,0.08);border-color:rgba(240,160,144,0.3)}
+.threat-strip.high{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.4);animation:tpulse 2s ease-in-out infinite}
+.threat-strip.extreme{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.65);animation:tpulse 1s ease-in-out infinite}
+@keyframes tpulse{0%,100%{box-shadow:none}50%{box-shadow:0 0 16px rgba(239,68,68,0.25)}}
+.threat-e{font-size:22px;flex-shrink:0}
+.threat-t{font-size:13px;font-weight:700}
+.threat-strip.none .threat-t{color:var(--green)}
+.threat-strip.low .threat-t{color:var(--amber)}
+.threat-strip.medium .threat-t{color:var(--rose)}
+.threat-strip.high .threat-t,.threat-strip.extreme .threat-t{color:var(--danger)}
+.threat-d{font-size:10px;color:var(--muted);margin-top:2px}
+
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:0 16px;margin-bottom:10px}
+.qs{background:var(--surface);border:1px solid var(--edge);border-radius:12px;padding:12px 6px;text-align:center}
+.qs-i{font-size:16px;margin-bottom:5px}
+.qs-v{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--text);line-height:1}
+.qs-u{font-size:8px;color:var(--muted)}
+.qs-l{font-size:8px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted2);margin-top:4px}
+
+/* collapsibles */
+.coll-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px;cursor:pointer;user-select:none}
+.coll-hdr .sec-label{padding:0;margin:0}
+.coll-arrow{font-size:11px;color:var(--muted);transition:transform 0.3s;display:inline-block}
+.coll-arrow.open{transform:rotate(180deg)}
+.coll-body{transition:max-height 0.35s ease,opacity 0.3s ease;max-height:2000px;opacity:1;overflow:hidden}
+.coll-body.shut{max-height:0;opacity:0}
+
+.hourly-scroll{overflow-x:auto;padding:0 16px 10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.hourly-scroll::-webkit-scrollbar{display:none}
+.hourly-track{display:flex;gap:6px;width:max-content}
+.hc{background:var(--surface);border:1px solid var(--edge);border-radius:12px;padding:10px 8px;text-align:center;min-width:58px}
+.hc.now{border-color:rgba(240,160,144,0.45);background:rgba(240,160,144,0.06)}
+.hc.storm{border-color:rgba(239,68,68,0.45);background:rgba(239,68,68,0.05)}
+.hc.rain{border-color:rgba(56,189,248,0.3)}
+.hc-time{font-size:9px;font-weight:700;color:var(--muted);letter-spacing:0.5px;margin-bottom:5px}
+.hc-icon{font-size:17px;margin-bottom:4px}
+.hc-temp{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600}
+.hc-rain{font-size:9px;color:var(--cyan);margin-top:3px}
+.now-pip{width:4px;height:4px;border-radius:50%;background:var(--rose);margin:0 auto 3px}
+
+.panels-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 16px;margin-bottom:4px}
+.pb{background:var(--surface);border:1px solid var(--edge);border-radius:12px;padding:14px 8px;text-align:center;cursor:pointer;transition:all 0.15s}
+.pb:active{transform:scale(0.96);background:var(--surface2)}
+.pb.hi{border-color:rgba(240,160,144,0.3)}
+.pb-i{font-size:22px;margin-bottom:6px}
+.pb-l{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted)}
+
+.daily-list{display:flex;flex-direction:column;gap:5px;padding:0 16px}
+.dr{background:var(--surface);border:1px solid var(--edge);border-radius:10px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.dr.sd{border-color:rgba(239,68,68,0.3)}
+.dr.rd{border-color:rgba(56,189,248,0.2)}
+.dn{font-size:12px;font-weight:600;width:38px;flex-shrink:0}
+.di{font-size:18px;flex-shrink:0}
+.dd{font-size:11px;color:var(--muted);flex:1}
+.dp{font-size:10px;font-weight:700;color:var(--cyan);width:38px;text-align:center;flex-shrink:0}
+.dp.dry{color:var(--muted)}
+.dt{font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right;flex-shrink:0}
+.dt-hi{color:var(--text);font-weight:600}
+.dt-lo{color:var(--muted)}
+
+/* ── MAP SCREEN ── */
+#map-screen{background:#000}
+#map-wrap{flex:1;position:relative;overflow:hidden}
+#leaflet-map{position:absolute;inset:0;width:100%;height:100%}
+.map-top{position:absolute;top:0;left:0;right:0;z-index:500;padding:10px 12px;pointer-events:none}
+.map-top *{pointer-events:auto}
+.map-info{background:rgba(8,11,18,0.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--edge);border-radius:12px;padding:9px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.mi-loc{font-size:12px;font-weight:600;color:var(--rose)}
+.mi-cond{font-size:10px;color:var(--muted);margin-top:2px}
+.mi-temp{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600}
 .layer-bar{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
 .layer-bar::-webkit-scrollbar{display:none}
-.map-info-card{background:rgba(8,11,18,0.85);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--edge);border-radius:12px;padding:10px 14px;display:flex;align-items:center;justify-content:space-between}
-.mic-loc{font-size:11px;font-weight:600;color:var(--rose)}
-.mic-data{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600}
+.lpill{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;border:1px solid var(--edge);background:rgba(8,11,18,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:var(--muted);cursor:pointer;transition:all 0.2s;white-space:nowrap;font-family:'Inter',sans-serif}
+.lpill.active{background:var(--cyan-dim);border-color:var(--cyan);color:var(--cyan)}
+.ldot{width:6px;height:6px;border-radius:50%}
 
-/* ═══ STORM SCREEN ═══ */
-#storm-screen{background:var(--void);overflow-y:auto;padding-top:env(safe-area-inset-top,0)}
+/* ── STORM SCREEN ── */
+#storm-screen{overflow-y:auto;-webkit-overflow-scrolling:touch}
+.storm-inner{display:flex;flex-direction:column;padding-bottom:16px}
+.storm-hdr{padding:20px 16px 12px;display:flex;align-items:center;justify-content:space-between}
+.storm-title{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700}
+.storm-updated{font-size:10px;color:var(--muted);margin-top:3px}
 
-/* chase mode */
-#chase-mode-bar{margin:16px 16px 0;border-radius:12px;overflow:hidden}
-.chase-off{background:var(--surface);border:1px solid var(--edge);padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
-.chase-label{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px}
-.chase-sub{font-size:10px;color:var(--muted);margin-top:2px}
-.chase-toggle{padding:8px 20px;background:var(--danger);color:white;border:none;border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all 0.2s}
-.chase-toggle:active{transform:scale(0.96)}
+.chase-bar{margin:0 16px 14px;background:var(--surface);border:1px solid var(--edge);border-radius:12px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.chase-bar-left .chase-name{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;color:var(--danger)}
+.chase-bar-left .chase-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.chase-btn{padding:9px 20px;background:var(--danger);color:#fff;border:none;border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:1px}
+.chase-btn:active{transform:scale(0.96)}
 
-/* chase active overlay */
-#chase-overlay{position:fixed;inset:0;z-index:2000;background:#000;display:none;flex-direction:column}
-#chase-overlay.active{display:flex}
-.chase-header{padding:16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1a0000}
-.chase-title{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;color:var(--danger);letter-spacing:3px;display:flex;align-items:center;gap:8px}
-.chase-blink{animation:blink 1s step-end infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-.chase-exit{padding:8px 16px;background:transparent;border:1px solid #330000;color:var(--danger);border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1px}
-.chase-map{flex:1;position:relative}
-.chase-map #chase-leaflet{height:100%}
-.chase-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#0d0000;border-top:1px solid #1a0000}
-.cs-cell{background:#080000;padding:12px 8px;text-align:center}
-.cs-val{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;color:var(--danger)}
-.cs-label{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#660000;margin-top:3px}
-.chase-alerts{padding:10px 16px;background:#040000;border-top:1px solid #1a0000}
-.chase-alert-item{font-size:11px;color:#ff4444;font-family:'JetBrains Mono',monospace;padding:3px 0;display:flex;align-items:center;gap:8px}
-.chase-alert-item::before{content:'▶';font-size:8px}
-
-/* storm metrics */
-.storm-metrics{padding:0 16px;margin-bottom:12px;display:flex;flex-direction:column;gap:6px}
-.sm-row{background:var(--surface);border:1px solid var(--edge);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between}
+.storm-metrics{display:flex;flex-direction:column;gap:6px;padding:0 16px;margin-bottom:12px}
+.sm{background:var(--surface);border:1px solid var(--edge);border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between}
 .sm-left{display:flex;align-items:center;gap:10px}
 .sm-icon{font-size:18px;width:28px;text-align:center}
 .sm-name{font-size:12px;font-weight:600}
 .sm-desc{font-size:10px;color:var(--muted);margin-top:2px}
-.sm-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;color:var(--text);text-align:right}
-.sm-unit{font-size:9px;color:var(--muted);font-family:'Inter',sans-serif}
+.sm-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:600;text-align:right}
+.sm-unit{font-size:9px;color:var(--muted);font-family:'Inter',sans-serif;text-align:right}
+.sm-val.good{color:var(--green)}
 .sm-val.warn{color:var(--amber)}
 .sm-val.danger{color:var(--danger)}
-.sm-val.good{color:var(--green)}
 
-/* ═══ CLOUDS SCREEN ═══ */
-#clouds-screen{background:var(--void);overflow-y:auto;padding-top:env(safe-area-inset-top,0)}
-.clouds-header{padding:20px 16px 16px}
-.clouds-title{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px}
-.clouds-sub{font-size:11px;color:var(--muted)}
-.cloud-cards{padding:0 16px;margin-bottom:16px;display:flex;flex-direction:column;gap:8px}
-.cloud-card{background:var(--surface);border:1px solid var(--edge);border-radius:14px;overflow:hidden}
-.cloud-card-header{padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
-.cloud-emoji{font-size:28px;flex-shrink:0;width:40px;text-align:center}
-.cloud-name{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700}
-.cloud-alt{font-size:10px;color:var(--muted);margin-top:2px}
-.cloud-badge{margin-left:auto;font-size:9px;font-weight:700;letter-spacing:1px;padding:4px 8px;border-radius:20px;text-transform:uppercase;flex-shrink:0}
-.cloud-badge.low{background:rgba(56,189,248,0.1);color:var(--cyan);border:1px solid rgba(56,189,248,0.2)}
-.cloud-badge.mid{background:rgba(251,191,36,0.1);color:var(--amber);border:1px solid rgba(251,191,36,0.2)}
-.cloud-badge.high{background:rgba(240,160,144,0.1);color:var(--rose);border:1px solid rgba(240,160,144,0.2)}
-.cloud-badge.vertical{background:rgba(239,68,68,0.1);color:var(--danger);border:1px solid rgba(239,68,68,0.2)}
-.cloud-badge.special{background:rgba(52,211,153,0.1);color:var(--green);border:1px solid rgba(52,211,153,0.2)}
-.cloud-body{padding:0 14px 14px;display:none}
-.cloud-body.open{display:block}
-.cloud-desc{font-size:12px;line-height:1.6;color:var(--text);margin-bottom:10px}
-.cloud-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
-.cloud-tag{font-size:9px;font-weight:700;letter-spacing:0.5px;padding:3px 8px;border-radius:20px;background:var(--surface2);border:1px solid var(--edge);color:var(--muted)}
-.cloud-spot-btn{width:100%;padding:9px;border-radius:8px;border:1px solid var(--edge);background:transparent;color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all 0.2s;text-transform:uppercase}
-.cloud-spot-btn.spotted{background:rgba(52,211,153,0.1);border-color:var(--green);color:var(--green)}
+/* chase overlay */
+#chase-ov{position:fixed;inset:0;z-index:2000;background:#000;display:none;flex-direction:column}
+#chase-ov.on{display:flex}
+.chase-ov-hdr{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1a0000;flex-shrink:0}
+.chase-ov-title{font-family:'Space Grotesk',sans-serif;font-size:17px;font-weight:700;color:var(--danger);letter-spacing:3px;display:flex;align-items:center;gap:8px}
+.blink{animation:blink 1s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.chase-exit{padding:8px 16px;background:transparent;border:1px solid #330000;color:var(--danger);border-radius:8px;font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;cursor:pointer;letter-spacing:1px}
+#chase-map-wrap{flex:1;position:relative}
+#chase-leaflet{position:absolute;inset:0;width:100%;height:100%}
+.chase-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#0d0000;border-top:1px solid #1a0000;flex-shrink:0}
+.cs{background:#060000;padding:11px 6px;text-align:center}
+.cs-v{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;color:var(--danger)}
+.cs-l{font-size:8px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#660000;margin-top:3px}
+.chase-alerts{padding:10px 16px;background:#030000;border-top:1px solid #1a0000;flex-shrink:0;max-height:80px;overflow-y:auto}
+.ca{font-size:10px;color:#ff4444;font-family:'JetBrains Mono',monospace;padding:2px 0;display:flex;align-items:center;gap:7px}
+.ca::before{content:'▶';font-size:8px;flex-shrink:0}
 
-/* checklist progress */
-.spot-progress{margin:0 16px 16px;background:var(--surface);border:1px solid var(--edge);border-radius:12px;padding:14px}
-.sp-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.sp-title{font-size:12px;font-weight:700}
-.sp-count{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--rose)}
-.sp-bar-bg{height:4px;background:var(--edge);border-radius:2px;overflow:hidden}
-.sp-bar-fill{height:100%;background:linear-gradient(90deg,var(--rose),#f4c2c2);border-radius:2px;transition:width 0.5s ease}
-
-/* ═══ RADAR SCREEN ═══ */
-#radar-screen{background:var(--void);overflow-y:auto;padding-top:env(safe-area-inset-top,0)}
-.radar-header{padding:20px 16px 16px;display:flex;align-items:center;justify-content:space-between}
+/* ── RADAR SCREEN ── */
+#radar-screen{overflow-y:auto;-webkit-overflow-scrolling:touch}
+.radar-inner{display:flex;flex-direction:column;padding-bottom:16px}
+.radar-hdr{padding:20px 16px 14px;display:flex;align-items:center;justify-content:space-between}
 .radar-title{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700}
 .live-badge{display:flex;align-items:center;gap:5px;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan)}
-.radar-embed{margin:0 16px 12px;border-radius:14px;overflow:hidden;border:1px solid var(--edge);background:var(--surface)}
-.radar-iframe{width:100%;height:320px;border:none;display:block}
-.radar-source-label{font-size:9px;color:var(--muted);text-align:center;padding:8px;border-top:1px solid var(--edge)}
-.lightning-panel{margin:0 16px 12px;background:var(--surface);border:1px solid var(--edge);border-radius:14px;padding:14px}
-.lp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.lp-title{font-size:12px;font-weight:700;display:flex;align-items:center;gap:7px}
-.lp-count{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--amber)}
-.strikes-list{display:flex;flex-direction:column;gap:5px;max-height:180px;overflow-y:auto}
-.strike-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--surface2);border-radius:8px;font-size:11px}
-.strike-age{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--amber);width:36px;flex-shrink:0}
-.strike-dist{color:var(--muted);flex:1}
-.strike-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.strike-dot.fresh{background:#fff700;box-shadow:0 0 6px #fff700}
-.strike-dot.recent{background:var(--amber)}
-.strike-dot.old{background:var(--muted2)}
-.no-lightning{font-size:11px;color:var(--muted);text-align:center;padding:12px}
-.sat-embed{margin:0 16px 12px;border-radius:14px;overflow:hidden;border:1px solid var(--edge)}
+.radar-block{margin:0 16px 14px}
+.radar-block-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.radar-card{background:var(--surface);border:1px solid var(--edge);border-radius:14px;overflow:hidden}
+.radar-iframe{width:100%;height:340px;border:none;display:block}
+.radar-src{font-size:9px;color:var(--muted);text-align:center;padding:7px;border-top:1px solid var(--edge)}
 
-/* ═══ CHASE OVERLAY RADAR ═══ */
-#chase-leaflet{width:100%;height:100%}
+/* ── CLOUDS SCREEN ── */
+#clouds-screen{overflow-y:auto;-webkit-overflow-scrolling:touch}
+.clouds-inner{display:flex;flex-direction:column;padding-bottom:16px}
+.clouds-hdr{padding:20px 16px 10px}
+.clouds-title{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px}
+.clouds-sub{font-size:11px;color:var(--muted)}
 
-/* ═══ LEAFLET OVERRIDES ═══ */
+.spot-prog{margin:0 16px 14px;background:var(--surface);border:1px solid var(--edge);border-radius:12px;padding:13px 14px}
+.sp-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+.sp-title{font-size:12px;font-weight:700}
+.sp-count{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--rose)}
+.sp-bg{height:4px;background:var(--edge);border-radius:2px;overflow:hidden}
+.sp-fill{height:100%;background:linear-gradient(90deg,var(--rose),#f4c2c2);border-radius:2px;transition:width 0.5s ease}
+
+.cloud-cards{display:flex;flex-direction:column;gap:7px;padding:0 16px}
+.cc{background:var(--surface);border:1px solid var(--edge);border-radius:13px;overflow:hidden}
+.cc-hdr{padding:13px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
+.cc-emoji{font-size:26px;flex-shrink:0;width:36px;text-align:center}
+.cc-name{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700}
+.cc-alt{font-size:10px;color:var(--muted);margin-top:2px}
+.cc-badge{margin-left:auto;font-size:9px;font-weight:700;letter-spacing:0.8px;padding:4px 9px;border-radius:20px;text-transform:uppercase;flex-shrink:0;white-space:nowrap}
+.badge-low{background:rgba(56,189,248,0.1);color:var(--cyan);border:1px solid rgba(56,189,248,0.2)}
+.badge-mid{background:rgba(251,191,36,0.1);color:var(--amber);border:1px solid rgba(251,191,36,0.2)}
+.badge-high{background:rgba(240,160,144,0.1);color:var(--rose);border:1px solid rgba(240,160,144,0.2)}
+.badge-vert{background:rgba(239,68,68,0.1);color:var(--danger);border:1px solid rgba(239,68,68,0.2)}
+.badge-spec{background:rgba(52,211,153,0.1);color:var(--green);border:1px solid rgba(52,211,153,0.2)}
+.cc-body{padding:0 14px 14px;border-top:1px solid var(--edge)}
+.cc-desc{font-size:12px;line-height:1.65;color:var(--text);margin-bottom:9px;margin-top:10px}
+.cc-means{font-size:11px;line-height:1.55;color:var(--muted);margin-bottom:10px}
+.cc-means strong{color:var(--rose)}
+.cc-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.cc-tag{font-size:9px;font-weight:700;letter-spacing:0.5px;padding:3px 8px;border-radius:20px;background:var(--surface2);border:1px solid var(--edge);color:var(--muted)}
+.spot-btn{width:100%;padding:9px;border-radius:8px;border:1px solid var(--edge);background:transparent;color:var(--muted);font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;cursor:pointer;transition:all 0.2s;text-transform:uppercase;letter-spacing:0.5px}
+.spot-btn.on{background:rgba(52,211,153,0.1);border-color:var(--green);color:var(--green)}
+
+/* leaflet overrides */
 .leaflet-control-zoom{display:none!important}
-.leaflet-control-attribution{font-size:7px!important;opacity:0.3;background:transparent!important;color:var(--muted)!important}
+.leaflet-control-attribution{font-size:7px!important;opacity:0.25;background:transparent!important;color:var(--muted)!important}
 .leaflet-control-attribution a{color:var(--muted)!important}
 
 .hidden{display:none!important}
@@ -285,907 +257,627 @@ html,body{width:100%;height:100%;overflow:hidden;background:var(--void);font-fam
 <div id="loading">
   <div class="load-logo">Storm<span>Watch</span></div>
   <div class="load-sub">Meteorological Command Centre</div>
-  <div id="load-spinner" class="spinner"></div>
-  <div id="load-error" class="load-err hidden">
-    <div class="load-err-icon">🌩️</div>
-    <div class="load-err-title" id="err-title">Location unavailable</div>
-    <div class="load-err-msg" id="err-msg">Allow location access to continue.</div>
+  <div id="load-spin" class="spinner"></div>
+  <div id="load-err" class="hidden" style="display:flex;flex-direction:column;align-items:center;gap:10px">
+    <div class="err-icon">🌩️</div>
+    <div class="err-title" id="err-t">Location unavailable</div>
+    <div class="err-msg" id="err-m">Allow location access to continue.</div>
     <button class="btn-primary" onclick="initApp()">Try Again</button>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     HOME SCREEN
-══════════════════════════════════════════════════ -->
+<!-- ══ HOME ══ -->
 <div id="home" class="screen">
+<div id="home-inner" class="home-inner">
   <div class="unit-row">
     <div class="unit-toggle">
       <button class="u-btn active" id="btnF" onclick="setUnit('F')">°F</button>
       <button class="u-btn" id="btnC" onclick="setUnit('C')">°C</button>
     </div>
   </div>
-
-  <div class="home-header">
-    <div>
-      <div class="home-loc">
-        <div class="loc-indicator"></div>
-        <div class="loc-name" id="h-loc">Locating…</div>
-      </div>
-      <div class="loc-time" id="h-time"></div>
+  <div class="home-hero">
+    <div class="hero-left">
+      <div class="loc-row"><div class="loc-dot"></div><div class="loc-name" id="h-loc">—</div></div>
+      <div class="loc-time" id="h-time">—</div>
     </div>
-    <div class="home-temp-block">
-      <div class="home-temp"><span id="h-temp">--</span><span class="home-temp-unit">°</span></div>
-      <div class="home-condition" id="h-cond">—</div>
+    <div class="hero-right">
+      <div class="hero-temp"><span id="h-temp">--</span><span class="hero-temp-unit">°</span></div>
+      <div class="hero-cond" id="h-cond">—</div>
     </div>
   </div>
-
-  <div class="context-banner" id="ctx-banner">
-    <div class="ctx-icon" id="ctx-icon">🌡️</div>
-    <div>
-      <div class="ctx-label">Conditions</div>
-      <div class="ctx-text" id="ctx-text">Loading weather data…</div>
-    </div>
+  <div class="ctx-banner">
+    <div class="ctx-icon" id="ctx-i">🌡️</div>
+    <div><div class="ctx-label">Conditions</div><div class="ctx-text" id="ctx-t">Loading…</div></div>
   </div>
-
   <div class="threat-strip none" id="h-threat">
-    <div class="threat-emoji" id="h-threat-e">🌸</div>
-    <div>
-      <div class="threat-title" id="h-threat-t">Loading…</div>
-      <div class="threat-desc" id="h-threat-d"></div>
-    </div>
+    <div class="threat-e" id="h-te">—</div>
+    <div><div class="threat-t" id="h-tt">Loading…</div><div class="threat-d" id="h-td"></div></div>
   </div>
-
   <div class="quick-grid" id="h-stats"></div>
 
-  <div class="collapsible-header" onclick="toggleSection('hourly')">
-    <div class="section-label">Next 24 hours</div>
-    <div class="collapse-arrow open" id="arrow-hourly">▾</div>
+  <div class="coll-hdr" onclick="toggle('hourly')">
+    <div class="sec-label" style="padding:0;margin:0">Next 24 Hours</div>
+    <span class="coll-arrow open" id="arr-hourly">▾</span>
   </div>
-  <div class="collapsible-body" id="body-hourly">
+  <div class="coll-body" id="cb-hourly">
     <div class="hourly-scroll"><div class="hourly-track" id="h-hourly"></div></div>
   </div>
 
-  <div class="collapsible-header" onclick="toggleSection('panels')">
-    <div class="section-label">Quick Access</div>
-    <div class="collapse-arrow open" id="arrow-panels">▾</div>
+  <div class="coll-hdr" onclick="toggle('panels')">
+    <div class="sec-label" style="padding:0;margin:0">Quick Access</div>
+    <span class="coll-arrow open" id="arr-panels">▾</span>
   </div>
-  <div class="collapsible-body" id="body-panels">
-    <div class="panels-grid">
-      <div class="panel-btn highlight" onclick="goTo('map-screen','map-nav');setLayer('rain')"><div class="pb-icon">🌧</div><div class="pb-label">Rain Radar</div></div>
-      <div class="panel-btn" onclick="goTo('map-screen','map-nav');setLayer('satellite')"><div class="pb-icon">🛰️</div><div class="pb-label">Satellite</div></div>
-      <div class="panel-btn" onclick="goTo('map-screen','map-nav');setLayer('wind')"><div class="pb-icon">💨</div><div class="pb-label">Wind</div></div>
-      <div class="panel-btn" onclick="goTo('radar-screen','radar-nav')"><div class="pb-icon">⚡</div><div class="pb-label">Lightning</div></div>
-      <div class="panel-btn" onclick="goTo('storm-screen','storm-nav');activateChase()"><div class="pb-icon">🔴</div><div class="pb-label">Chase Mode</div></div>
-      <div class="panel-btn" onclick="goTo('clouds-screen','clouds-nav')"><div class="pb-icon">☁️</div><div class="pb-label">Cloud Guide</div></div>
+  <div class="coll-body" id="cb-panels">
+    <div class="panels-grid" style="margin-bottom:4px">
+      <div class="pb hi" onclick="goTo('map-screen','map-nav');setLayer('rain')"><div class="pb-i">🌧️</div><div class="pb-l">Rain Radar</div></div>
+      <div class="pb" onclick="goTo('map-screen','map-nav');setLayer('satellite')"><div class="pb-i">🛰️</div><div class="pb-l">Satellite</div></div>
+      <div class="pb" onclick="goTo('map-screen','map-nav');setLayer('wind')"><div class="pb-i">💨</div><div class="pb-l">Wind Map</div></div>
+      <div class="pb" onclick="goTo('radar-screen','radar-nav')"><div class="pb-i">📡</div><div class="pb-l">Radar</div></div>
+      <div class="pb" onclick="goTo('storm-screen','storm-nav');activateChase()"><div class="pb-i">🔴</div><div class="pb-l">Chase Mode</div></div>
+      <div class="pb" onclick="goTo('clouds-screen','clouds-nav')"><div class="pb-i">☁️</div><div class="pb-l">Cloud Guide</div></div>
     </div>
   </div>
 
-  <div class="collapsible-header" onclick="toggleSection('daily')">
-    <div class="section-label">7-Day Outlook</div>
-    <div class="collapse-arrow open" id="arrow-daily">▾</div>
+  <div class="coll-hdr" onclick="toggle('daily')">
+    <div class="sec-label" style="padding:0;margin:0">7-Day Outlook</div>
+    <span class="coll-arrow open" id="arr-daily">▾</span>
   </div>
-  <div class="collapsible-body" id="body-daily">
-    <div class="daily-list" id="h-daily"></div>
+  <div class="coll-body" id="cb-daily">
+    <div class="daily-list" id="h-daily" style="margin-bottom:4px"></div>
   </div>
-
-  <div style="height:16px"></div>
+</div>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     MAP SCREEN
-══════════════════════════════════════════════════ -->
-<div id="map-screen" class="screen" style="position:relative">
-  <div id="leaflet-map" style="flex:1;position:relative"></div>
-
-  <div class="map-ui map-ui-top">
-    <div class="map-info-card" style="margin-bottom:10px">
-      <div>
-        <div class="mic-loc" id="map-loc">—</div>
-        <div style="font-size:9px;color:var(--muted);margin-top:2px" id="map-cond">Loading…</div>
+<!-- ══ MAP ══ -->
+<div id="map-screen" class="screen">
+  <div id="map-wrap">
+    <div id="leaflet-map"></div>
+    <div class="map-top">
+      <div class="map-info">
+        <div><div class="mi-loc" id="map-loc">—</div><div class="mi-cond" id="map-cond">—</div></div>
+        <div class="mi-temp" id="map-temp">--°</div>
       </div>
-      <div class="mic-data" id="map-temp">--°</div>
-    </div>
-    <div class="layer-bar" id="layer-bar">
-      <div class="pill cyan active" data-layer="none" onclick="setLayer('none')">● Clear</div>
-      <div class="pill cyan" data-layer="rain" onclick="setLayer('rain')">🌧 Rain</div>
-      <div class="pill cyan" data-layer="satellite" onclick="setLayer('satellite')">🛰️ Satellite</div>
-      <div class="pill cyan" data-layer="wind" onclick="setLayer('wind')">💨 Wind</div>
-      <div class="pill cyan" data-layer="temp" onclick="setLayer('temp')">🌡 Temp</div>
-      <div class="pill cyan" data-layer="clouds" onclick="setLayer('clouds')">☁️ Clouds</div>
-      <div class="pill cyan" data-layer="pressure" onclick="setLayer('pressure')">📊 Pressure</div>
+      <div class="layer-bar" id="layer-bar">
+        <div class="lpill active" data-layer="none" onclick="setLayer('none')"><span class="ldot" style="background:#555"></span>Clear</div>
+        <div class="lpill" data-layer="rain" onclick="setLayer('rain')"><span class="ldot" style="background:#38bdf8"></span>Rain</div>
+        <div class="lpill" data-layer="satellite" onclick="setLayer('satellite')"><span class="ldot" style="background:#a78bfa"></span>Satellite</div>
+        <div class="lpill" data-layer="wind" onclick="setLayer('wind')"><span class="ldot" style="background:#34d399"></span>Wind</div>
+        <div class="lpill" data-layer="temp" onclick="setLayer('temp')"><span class="ldot" style="background:#f87171"></span>Temp</div>
+        <div class="lpill" data-layer="clouds" onclick="setLayer('clouds')"><span class="ldot" style="background:#94a3b8"></span>Clouds</div>
+        <div class="lpill" data-layer="pressure" onclick="setLayer('pressure')"><span class="ldot" style="background:#f0a090"></span>Pressure</div>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     STORM SCREEN
-══════════════════════════════════════════════════ -->
+<!-- ══ STORM ══ -->
 <div id="storm-screen" class="screen">
-  <div style="padding:20px 16px 12px;display:flex;align-items:center;justify-content:space-between">
-    <div>
-      <div style="font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700">Storm Centre</div>
-      <div style="font-size:10px;color:var(--muted);margin-top:3px" id="storm-updated">—</div>
-    </div>
-    <div class="live-dot rose-dot" style="background:var(--rose);box-shadow:0 0 8px var(--rose)"></div>
+<div class="storm-inner">
+  <div class="storm-hdr">
+    <div><div class="storm-title">Storm Centre</div><div class="storm-updated" id="storm-upd">—</div></div>
+    <div class="live-dot" style="background:var(--rose);box-shadow:0 0 8px var(--rose)"></div>
   </div>
-
-  <div id="chase-mode-bar">
-    <div class="chase-off">
-      <div>
-        <div class="chase-label" style="color:var(--danger)">⚡ CHASE MODE</div>
-        <div class="chase-sub">Activate storm tracking interface</div>
-      </div>
-      <button class="chase-toggle" onclick="activateChase()">ACTIVATE</button>
+  <div class="chase-bar">
+    <div class="chase-bar-left">
+      <div class="chase-name">⚡ CHASE MODE</div>
+      <div class="chase-sub">Full-screen storm tracking interface</div>
     </div>
+    <button class="chase-btn" onclick="activateChase()">ACTIVATE</button>
   </div>
-
-  <div style="height:12px"></div>
-  <div class="section-label">Live Conditions</div>
+  <div class="sec-label">Live Conditions</div>
   <div class="storm-metrics" id="storm-metrics"></div>
-
-  <div class="collapsible-header" onclick="toggleSection('storm-daily')">
-    <div class="section-label">Storm Outlook</div>
-    <div class="collapse-arrow open" id="arrow-storm-daily">▾</div>
+  <div class="coll-hdr" onclick="toggle('sdaily')">
+    <div class="sec-label" style="padding:0;margin:0">Storm Outlook — 7 Days</div>
+    <span class="coll-arrow open" id="arr-sdaily">▾</span>
   </div>
-  <div class="collapsible-body" id="body-storm-daily">
-    <div class="daily-list" id="storm-daily"></div>
+  <div class="coll-body" id="cb-sdaily">
+    <div class="daily-list" id="storm-daily" style="margin-bottom:4px"></div>
   </div>
-  <div style="height:16px"></div>
+</div>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     CLOUDS SCREEN
-══════════════════════════════════════════════════ -->
-<div id="clouds-screen" class="screen">
-  <div class="clouds-header">
-    <div class="clouds-title">Cloud Guide ☁️</div>
-    <div class="clouds-sub">Tap any cloud to learn more. Check them off when you spot them.</div>
+<!-- ══ RADAR ══ -->
+<div id="radar-screen" class="screen">
+<div class="radar-inner">
+  <div class="radar-hdr">
+    <div class="radar-title">Live Radar</div>
+    <div class="live-badge"><div class="live-dot"></div>Live</div>
   </div>
-  <div class="spot-progress">
-    <div class="sp-top">
-      <div class="sp-title">☁️ Spotting Collection</div>
-      <div class="sp-count"><span id="sp-count">0</span> / 12 spotted</div>
+  <div class="radar-block">
+    <div class="radar-block-label"><div class="live-dot"></div>Rain Radar — Updates every 10 min</div>
+    <div class="radar-card">
+      <iframe class="radar-iframe" id="radar-rain-iframe" src="about:blank" allowfullscreen></iframe>
+      <div class="radar-src">RainViewer · Open-source radar data</div>
     </div>
-    <div class="sp-bar-bg"><div class="sp-bar-fill" id="sp-bar" style="width:0%"></div></div>
+  </div>
+  <div class="radar-block">
+    <div class="radar-block-label"><div class="live-dot" style="background:#a78bfa;box-shadow:none"></div>Satellite Cloud Imagery</div>
+    <div class="radar-card">
+      <iframe class="radar-iframe" id="radar-sat-iframe" src="about:blank" allowfullscreen></iframe>
+      <div class="radar-src">RainViewer · EUMETSAT Infrared Satellite</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ══ CLOUDS ══ -->
+<div id="clouds-screen" class="screen">
+<div class="clouds-inner">
+  <div class="clouds-hdr">
+    <div class="clouds-title">Cloud Guide ☁️</div>
+    <div class="clouds-sub">Tap a cloud to learn more — check them off when you spot them</div>
+  </div>
+  <div class="spot-prog">
+    <div class="sp-top"><div class="sp-title">☁️ Spotting Collection</div><div class="sp-count"><span id="sp-n">0</span> / 12 spotted</div></div>
+    <div class="sp-bg"><div class="sp-fill" id="sp-bar" style="width:0%"></div></div>
   </div>
   <div class="cloud-cards" id="cloud-cards"></div>
-  <div style="height:16px"></div>
+</div>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     RADAR SCREEN
-══════════════════════════════════════════════════ -->
-<div id="radar-screen" class="screen">
-  <div class="radar-header">
-    <div class="radar-title">Radar & Lightning</div>
-    <div class="live-badge"><div class="live-dot"></div> Live</div>
-  </div>
-
-  <div class="section-label">Live Rain Radar</div>
-  <div class="radar-embed">
-    <iframe class="radar-iframe" id="radar-iframe"
-      src="https://www.rainviewer.com/map.html?loc=51.5,-0.1,5&oFa=0&oC=0&oU=0&oCS=1&oF=0&oAP=0&rmt=4&c=1&o=83&lm=1&layer=radar&sm=1&sn=1"
-      allowfullscreen></iframe>
-    <div class="radar-source-label">Rain Radar · RainViewer · Updates every 10 min</div>
-  </div>
-
-  <div class="section-label">Lightning Activity</div>
-  <div class="lightning-panel">
-    <div class="lp-header">
-      <div class="lp-title">⚡ Strike Tracker <div class="live-dot" style="margin-left:4px"></div></div>
-      <div class="lp-count" id="strike-count">Connecting…</div>
-    </div>
-    <div class="strikes-list" id="strikes-list">
-      <div class="no-lightning" id="lightning-status">Connecting to lightning network…</div>
-    </div>
-  </div>
-
-  <div class="section-label">Satellite Cloud Cover</div>
-  <div class="radar-embed">
-    <iframe class="radar-iframe"
-      src="https://www.rainviewer.com/map.html?loc=51.5,-0.1,4&oFa=0&oC=0&oU=0&oCS=1&oF=0&oAP=0&rmt=4&c=1&o=83&lm=1&layer=satellite&sm=1&sn=1"
-      allowfullscreen></iframe>
-    <div class="radar-source-label">Satellite Imagery · RainViewer · EUMETSAT</div>
-  </div>
-
-  <div style="height:16px"></div>
-</div>
-
-<!-- ══════════════════════════════════════════════════
-     CHASE MODE OVERLAY
-══════════════════════════════════════════════════ -->
-<div id="chase-overlay">
-  <div class="chase-header">
-    <div class="chase-title">
-      <span class="chase-blink">▶</span> CHASE MODE
-    </div>
+<!-- ══ CHASE OVERLAY ══ -->
+<div id="chase-ov">
+  <div class="chase-ov-hdr">
+    <div class="chase-ov-title"><span class="blink">▶</span> CHASE MODE</div>
     <button class="chase-exit" onclick="deactivateChase()">✕ EXIT</button>
   </div>
-  <div class="chase-map">
+  <div id="chase-map-wrap">
     <div id="chase-leaflet"></div>
   </div>
-  <div class="chase-stats" id="chase-stats">
-    <div class="cs-cell"><div class="cs-val" id="cs-wind">--</div><div class="cs-label">Wind</div></div>
-    <div class="cs-cell"><div class="cs-val" id="cs-gust">--</div><div class="cs-label">Gusts</div></div>
-    <div class="cs-cell"><div class="cs-val" id="cs-rain">--%</div><div class="cs-label">Rain %</div></div>
-    <div class="cs-cell"><div class="cs-val" id="cs-press">--</div><div class="cs-label">hPa</div></div>
+  <div class="chase-stats">
+    <div class="cs"><div class="cs-v" id="cs-wind">--</div><div class="cs-l">Wind</div></div>
+    <div class="cs"><div class="cs-v" id="cs-gust">--</div><div class="cs-l">Gusts</div></div>
+    <div class="cs"><div class="cs-v" id="cs-rain">--%</div><div class="cs-l">Rain %</div></div>
+    <div class="cs"><div class="cs-v" id="cs-press">--</div><div class="cs-l">hPa</div></div>
   </div>
-  <div class="chase-alerts" id="chase-alerts">
-    <div class="chase-alert-item">Initialising storm data…</div>
-  </div>
+  <div class="chase-alerts" id="chase-alerts"><div class="ca">Initialising…</div></div>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     BOTTOM NAV
-══════════════════════════════════════════════════ -->
+<!-- ══ NAV ══ -->
 <div id="nav">
-  <button class="nav-btn active" id="home-nav" onclick="goTo('home','home-nav')">
-    <div class="nav-icon">🏠</div><div class="nav-label">Home</div>
-  </button>
-  <button class="nav-btn" id="map-nav" onclick="goTo('map-screen','map-nav')">
-    <div class="nav-icon">🗺️</div><div class="nav-label">Map</div>
-  </button>
-  <button class="nav-btn" id="storm-nav" onclick="goTo('storm-screen','storm-nav')">
-    <div class="nav-icon">⛈️</div><div class="nav-label">Storm</div>
-  </button>
-  <button class="nav-btn" id="radar-nav" onclick="goTo('radar-screen','radar-nav')">
-    <div class="nav-icon">⚡</div><div class="nav-label">Radar</div>
-  </button>
-  <button class="nav-btn" id="clouds-nav" onclick="goTo('clouds-screen','clouds-nav')">
-    <div class="nav-icon">☁️</div><div class="nav-label">Clouds</div>
-  </button>
+  <button class="nav-btn active" id="home-nav" onclick="goTo('home','home-nav')"><div class="nav-icon">🏠</div><div class="nav-label">Home</div></button>
+  <button class="nav-btn" id="map-nav" onclick="goTo('map-screen','map-nav')"><div class="nav-icon">🗺️</div><div class="nav-label">Map</div></button>
+  <button class="nav-btn" id="storm-nav" onclick="goTo('storm-screen','storm-nav')"><div class="nav-icon">⛈️</div><div class="nav-label">Storm</div></button>
+  <button class="nav-btn" id="radar-nav" onclick="goTo('radar-screen','radar-nav')"><div class="nav-icon">📡</div><div class="nav-label">Radar</div></button>
+  <button class="nav-btn" id="clouds-nav" onclick="goTo('clouds-screen','clouds-nav')"><div class="nav-icon">☁️</div><div class="nav-label">Clouds</div></button>
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════════════════
-let unit = localStorage.getItem('sw_unit') || 'F';
+// ══ STATE ══
+let unit = localStorage.getItem('sw_unit')||'F';
 let raw = null;
-let userLat = 51.5, userLon = -0.1;
-let mainMap = null, chaseMap = null, weatherLayer = null, chaseWeatherLayer = null;
-let strikes = [];
-let spottedClouds = JSON.parse(localStorage.getItem('sw_spotted') || '[]');
-let sections = JSON.parse(localStorage.getItem('sw_sections') || '{}');
+let uLat = 51.5, uLon = -0.1;
+let mainMap = null, chaseMap = null, wLayer = null, chaseWLayer = null;
+let rvTiles = {};
+let spotted = JSON.parse(localStorage.getItem('sw_spotted')||'[]');
+let sections = JSON.parse(localStorage.getItem('sw_secs')||'{"hourly":true,"panels":true,"daily":true,"sdaily":true}');
+let mapReady = false, chaseMapReady = false;
+let curLayer = 'none';
 
-// ══════════════════════════════════════════════════════
-// HELPERS
-// ══════════════════════════════════════════════════════
-const toF = c => c * 9/5 + 32;
-const fmt = c => unit === 'F' ? Math.round(toF(c)) : Math.round(c);
-const fmtU = c => fmt(c) + '°';
-const mpsToMph = s => s * 2.237;
-const fmtWind = s => unit === 'F' ? Math.round(mpsToMph(s)) : Math.round(s * 3.6);
-const windLbl = () => unit === 'F' ? 'mph' : 'km/h';
-const distKmToStr = km => unit === 'F' ? (km * 0.621).toFixed(0) + ' mi' : km.toFixed(0) + ' km';
+// ══ HELPERS ══
+const toF = c => c*9/5+32;
+const fmt = c => unit==='F'?Math.round(toF(c)):Math.round(c);
+const fmtU = c => fmt(c)+'°';
+const mpsToMph = s => s*2.237;
+const fmtW = s => unit==='F'?Math.round(mpsToMph(s)):Math.round(s*3.6);
+const wLbl = () => unit==='F'?'mph':'km/h';
 
-function decodeWMO(c) {
-  const m = {
-    0:['Clear Sky','☀️'],1:['Mainly Clear','🌤️'],2:['Partly Cloudy','⛅'],3:['Overcast','☁️'],
-    45:['Fog','🌫️'],48:['Freezing Fog','🌫️'],
-    51:['Light Drizzle','🌦️'],53:['Drizzle','🌦️'],55:['Heavy Drizzle','🌧️'],
-    61:['Light Rain','🌧️'],63:['Rain','🌧️'],65:['Heavy Rain','🌧️'],
-    71:['Light Snow','🌨️'],73:['Snow','❄️'],75:['Heavy Snow','❄️'],77:['Snow Grains','🌨️'],
-    80:['Showers','🌦️'],81:['Mod. Showers','🌧️'],82:['Violent Showers','⛈️'],
-    85:['Snow Showers','🌨️'],86:['Heavy Snow Showers','❄️'],
-    95:['Thunderstorm','⛈️'],96:['Hail Storm','⛈️'],99:['Severe Storm','🌩️'],
-  };
-  return m[c] || ['Unknown','🌡️'];
+function wmo(c){
+  const m={0:['Clear','☀️'],1:['Mainly Clear','🌤️'],2:['Partly Cloudy','⛅'],3:['Overcast','☁️'],
+    45:['Fog','🌫️'],48:['Icy Fog','🌫️'],51:['Light Drizzle','🌦️'],53:['Drizzle','🌦️'],55:['Heavy Drizzle','🌧️'],
+    61:['Light Rain','🌧️'],63:['Rain','🌧️'],65:['Heavy Rain','🌧️'],71:['Light Snow','🌨️'],73:['Snow','❄️'],
+    75:['Heavy Snow','❄️'],77:['Snow Grains','🌨️'],80:['Showers','🌦️'],81:['Showers','🌧️'],82:['Violent Showers','⛈️'],
+    85:['Snow Showers','🌨️'],86:['Heavy Snow Showers','❄️'],95:['Thunderstorm','⛈️'],96:['Hail Storm','⛈️'],99:['Severe Storm','🌩️']};
+  return m[c]||['Unknown','🌡️'];
 }
 
-function assessThreat(cur, hourly) {
-  const wmo = cur.weather_code;
-  const gustMph = mpsToMph(cur.wind_gusts_10m);
-  const maxProb = Math.max(...(hourly.precipitation_probability||[]).slice(0,24));
-  const hasThunder = [95,96,99].includes(wmo) || (hourly.weather_code||[]).slice(0,24).some(c=>[95,96,99].includes(c));
-  if (hasThunder && gustMph > 50) return {level:'extreme',e:'🌩️',t:'Severe Storm Warning',d:'Damaging winds & active lightning. Seek shelter now.'};
-  if (hasThunder) return {level:'high',e:'⛈️',t:'Thunderstorm Activity',d:'Lightning risk in your area. Stay alert.'};
-  if (gustMph > 40) return {level:'high',e:'💨',t:'High Wind Alert',d:'Damaging gusts possible. Secure loose objects.'};
-  if (maxProb > 70) return {level:'medium',e:'🌧️',t:'Heavy Rain Likely',d:'Significant rainfall expected in your area.'};
-  if (maxProb > 40 || gustMph > 25) return {level:'low',e:'🌦️',t:'Unsettled Conditions',d:'Some rain or wind possible today.'};
-  return {level:'none',e:'✅',t:'All Clear',d:'Calm and stable conditions. Great for cloud watching!'};
+function threat(cur,hourly){
+  const g=mpsToMph(cur.wind_gusts_10m);
+  const p=Math.max(...(hourly.precipitation_probability||[]).slice(0,24));
+  const th=[95,96,99].includes(cur.weather_code)||(hourly.weather_code||[]).slice(0,24).some(c=>[95,96,99].includes(c));
+  if(th&&g>50)return{l:'extreme',e:'🌩️',t:'Severe Storm Warning',d:'Damaging winds & active lightning. Seek shelter now.'};
+  if(th)return{l:'high',e:'⛈️',t:'Thunderstorm Activity',d:'Lightning risk in your area. Stay alert.'};
+  if(g>40)return{l:'high',e:'💨',t:'High Wind Alert',d:'Damaging gusts possible. Secure loose items.'};
+  if(p>70)return{l:'medium',e:'🌧️',t:'Heavy Rain Likely',d:'Significant rainfall expected today.'};
+  if(p>40||g>25)return{l:'low',e:'🌦️',t:'Unsettled Conditions',d:'Some rain or wind possible today.'};
+  return{l:'none',e:'✅',t:'All Clear',d:'Calm and stable. Great for cloud watching!'};
 }
 
-function smartContext(cur, hourly, daily) {
-  const wmo = cur.weather_code;
-  const ws = mpsToMph(cur.wind_speed_10m);
-  const gust = mpsToMph(cur.wind_gusts_10m);
-  const humidity = cur.relative_humidity_2m;
-  const press = cur.surface_pressure;
-  const maxProb = Math.max(...(hourly.precipitation_probability||[]).slice(0,12));
-  const hasThunder = [95,96,99].includes(wmo);
-  const stormLater = (hourly.weather_code||[]).slice(1,12).some(c=>[95,96,99].includes(c));
-  const precipLater = (hourly.precipitation_probability||[]).slice(1,6).some(p=>p>60);
-
-  if (hasThunder) return {icon:'🌩️', text:'Active thunderstorm in your area. Lightning is occurring nearby — stay indoors and away from windows.'};
-  if (stormLater) return {icon:'⛈️', text:'Storm conditions are developing. Thunderstorm activity expected within the next few hours — ideal time to watch from safety.'};
-  if (press < 995) return {icon:'📉', text:'Very low pressure detected — a deep low-pressure system is nearby. Stormy, windy conditions likely.'};
-  if (press < 1005 && humidity > 80 && maxProb > 50) return {icon:'🌧️', text:'Conditions are ripe for storm development: falling pressure, high humidity, and rain on the way.'};
-  if (gust > 35) return {icon:'💨', text:'Strong gusts detected. Winds are gusty enough to cause disruption — great conditions for watching turbulent skies.'};
-  if (precipLater) return {icon:'🌦️', text:'Rain moving in later today. Conditions may be favourable for cloud development as the front approaches.'};
-  if (humidity > 85 && ws < 10) return {icon:'🌫️', text:'Very humid and calm — fog or low cloud formation possible, especially overnight and into the morning.'};
-  if (ws > 20 && [0,1,2,3].includes(wmo)) return {icon:'🌬️', text:'Breezy but dry. Good visibility for watching high-level clouds drift overhead.'};
-  if ([0,1].includes(wmo) && ws < 10) return {icon:'☀️', text:'Clear and calm conditions. Perfect for cloud spotting — look out for fair-weather cumulus building through the afternoon.'};
-  return {icon:'🌡️', text:'Conditions are stable. A good time to explore the sky — check the Cloud Guide to identify what you see overhead.'};
+function context(cur,hourly){
+  const w=cur.weather_code,ws=mpsToMph(cur.wind_speed_10m),g=mpsToMph(cur.wind_gusts_10m);
+  const hu=cur.relative_humidity_2m,pr=cur.surface_pressure;
+  const mp=Math.max(...(hourly.precipitation_probability||[]).slice(0,12));
+  const th=[95,96,99].includes(w);
+  const sl=(hourly.weather_code||[]).slice(1,12).some(c=>[95,96,99].includes(c));
+  if(th)return{i:'🌩️',t:'Active thunderstorm in your area. Lightning is occurring nearby — stay indoors and away from windows.'};
+  if(sl)return{i:'⛈️',t:'Storm conditions are developing. Thunderstorm activity expected within the next few hours — ideal time to watch from safety.'};
+  if(pr<995)return{i:'📉',t:'Very low pressure — a deep low-pressure system is nearby. Stormy, windy conditions likely.'};
+  if(pr<1005&&hu>80&&mp>50)return{i:'🌧️',t:'Conditions are ripe for storm development: falling pressure, high humidity, and rain on the way.'};
+  if(g>35)return{i:'💨',t:'Strong gusts detected. Great conditions for watching turbulent, dramatic skies.'};
+  if(mp>40)return{i:'🌦️',t:'Rain moving in later today. Conditions may be favourable for interesting cloud development as the front approaches.'};
+  if(hu>85&&ws<10)return{i:'🌫️',t:'Very humid and calm — fog or low cloud formation possible, especially overnight into morning.'};
+  if([0,1].includes(w)&&ws<10)return{i:'☀️',t:'Clear and calm. Perfect for cloud spotting — look out for fair-weather cumulus building through the afternoon.'};
+  return{i:'🌡️',t:'Conditions are stable. A good time to explore the sky — check the Cloud Guide to identify what\'s overhead.'};
 }
 
-// ══════════════════════════════════════════════════════
-// NAV
-// ══════════════════════════════════════════════════════
-function goTo(screenId, navId) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(screenId).classList.add('active');
-  document.getElementById(navId).classList.add('active');
-  if (screenId === 'map-screen' && mainMap) setTimeout(() => mainMap.invalidateSize(), 50);
+// ══ NAV ══
+function goTo(sid,nid){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(sid).classList.add('active');
+  document.getElementById(nid).classList.add('active');
+  if(sid==='map-screen'){
+    setTimeout(()=>{
+      if(mainMap){mainMap.invalidateSize();mainMap.setView([uLat,uLon],mainMap.getZoom());}
+    },80);
+  }
 }
 
-// ══════════════════════════════════════════════════════
-// COLLAPSIBLE
-// ══════════════════════════════════════════════════════
-function toggleSection(key) {
-  const body = document.getElementById('body-' + key);
-  const arrow = document.getElementById('arrow-' + key);
-  const isOpen = !body.classList.contains('closed');
-  body.classList.toggle('closed', isOpen);
-  arrow.classList.toggle('open', !isOpen);
-  sections[key] = !isOpen;
-  localStorage.setItem('sw_sections', JSON.stringify(sections));
+// ══ COLLAPSE ══
+function toggle(key){
+  const open=sections[key]!==false;
+  sections[key]=!open;
+  localStorage.setItem('sw_secs',JSON.stringify(sections));
+  applySection(key);
+}
+function applySection(key){
+  const open=sections[key]!==false;
+  const body=document.getElementById('cb-'+key);
+  const arr=document.getElementById('arr-'+key);
+  if(body){body.classList.toggle('shut',!open);}
+  if(arr){arr.classList.toggle('open',open);}
+}
+function restoreSections(){
+  ['hourly','panels','daily','sdaily'].forEach(k=>applySection(k));
 }
 
-function restoreSections() {
-  Object.entries(sections).forEach(([key, open]) => {
-    const body = document.getElementById('body-' + key);
-    const arrow = document.getElementById('arrow-' + key);
-    if (body && arrow) {
-      body.classList.toggle('closed', !open);
-      arrow.classList.toggle('open', open);
-    }
-  });
+// ══ UNIT ══
+function setUnit(u){
+  unit=u;localStorage.setItem('sw_unit',u);
+  document.getElementById('btnF').classList.toggle('active',u==='F');
+  document.getElementById('btnC').classList.toggle('active',u==='C');
+  if(raw)renderAll();
 }
 
-// ══════════════════════════════════════════════════════
-// UNIT
-// ══════════════════════════════════════════════════════
-function setUnit(u) {
-  unit = u;
-  localStorage.setItem('sw_unit', u);
-  document.getElementById('btnF').classList.toggle('active', u==='F');
-  document.getElementById('btnC').classList.toggle('active', u==='C');
-  if (raw) renderAll();
-}
-
-// ══════════════════════════════════════════════════════
-// MAP
-// ══════════════════════════════════════════════════════
-function initMap() {
-  if (mainMap) return;
-  mainMap = L.map('leaflet-map', {zoomControl:false, maxZoom:8, minZoom:3})
-    .setView([userLat, userLon], 6);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution:'© OpenStreetMap © CARTO', maxZoom:8
-  }).addTo(mainMap);
-
-  // User marker
-  const icon = L.divIcon({
-    html:`<div style="width:12px;height:12px;border-radius:50%;background:var(--rose);border:2px solid rgba(255,255,255,0.4);box-shadow:0 0 10px var(--rose)"></div>`,
-    className:'', iconSize:[12,12], iconAnchor:[6,6]
-  });
-  L.marker([userLat, userLon], {icon}).addTo(mainMap);
-}
-
-let rainviewerTiles = [];
-async function loadRainViewerTimes() {
-  try {
-    const r = await fetch('https://api.rainviewer.com/public/weather-maps.json');
-    const d = await r.json();
-    rainviewerTiles = {
-      radar: d.radar?.past?.slice(-1)[0]?.path,
-      satellite: d.satellite?.infrared?.slice(-1)[0]?.path
+// ══ MAP ══
+async function loadRV(){
+  try{
+    const r=await fetch('https://api.rainviewer.com/public/weather-maps.json');
+    const d=await r.json();
+    rvTiles={
+      radar:d.radar?.past?.slice(-1)[0]?.path,
+      satellite:d.satellite?.infrared?.slice(-1)[0]?.path
     };
-  } catch(e) { rainviewerTiles = {}; }
+  }catch(e){rvTiles={};}
 }
 
-async function setLayer(key) {
-  currentLayer = key;
-  document.querySelectorAll('#layer-bar .pill').forEach(p => {
-    p.classList.toggle('active', p.dataset.layer === key);
-  });
-  if (weatherLayer) { mainMap.removeLayer(weatherLayer); weatherLayer = null; }
-  if (key === 'none') return;
-
-  let url = null;
-  if (key === 'rain' && rainviewerTiles.radar) {
-    url = `https://tilecache.rainviewer.com${rainviewerTiles.radar}/256/{z}/{x}/{y}/2/1_1.png`;
-  } else if (key === 'satellite' && rainviewerTiles.satellite) {
-    url = `https://tilecache.rainviewer.com${rainviewerTiles.satellite}/256/{z}/{x}/{y}/0/0_0.png`;
-  } else if (key === 'wind') {
-    url = 'https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=439d4b804bc8187953eb36d2a8c26a02';
-  } else if (key === 'temp') {
-    url = 'https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=439d4b804bc8187953eb36d2a8c26a02';
-  } else if (key === 'clouds') {
-    url = 'https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=439d4b804bc8187953eb36d2a8c26a02';
-  } else if (key === 'pressure') {
-    url = 'https://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid=439d4b804bc8187953eb36d2a8c26a02';
-  }
-
-  if (url) {
-    weatherLayer = L.tileLayer(url, {opacity:0.75, maxZoom:8});
-    weatherLayer.addTo(mainMap);
-  }
+function buildMap(){
+  if(mapReady)return;
+  mapReady=true;
+  mainMap=L.map('leaflet-map',{zoomControl:false,maxZoom:8,minZoom:2,preferCanvas:true})
+    .setView([uLat,uLon],6);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+    attribution:'© OpenStreetMap © CARTO',maxZoom:8,subdomains:'abcd'
+  }).addTo(mainMap);
+  addUserMarker(mainMap,'var(--rose)','#f0a090');
+  setTimeout(()=>mainMap.invalidateSize(),200);
 }
-let currentLayer = 'none';
 
-// Chase map
-function initChaseMap() {
-  if (chaseMap) return;
-  chaseMap = L.map('chase-leaflet', {zoomControl:false, maxZoom:8, minZoom:3})
-    .setView([userLat, userLon], 6);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution:'', maxZoom:8
+function buildChaseMap(){
+  if(chaseMapReady)return;
+  chaseMapReady=true;
+  chaseMap=L.map('chase-leaflet',{zoomControl:false,maxZoom:8,minZoom:2,preferCanvas:true})
+    .setView([uLat,uLon],6);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{
+    attribution:'',maxZoom:8,subdomains:'abcd'
   }).addTo(chaseMap);
-  // Rain layer on chase map
-  if (rainviewerTiles.radar) {
-    const url = `https://tilecache.rainviewer.com${rainviewerTiles.radar}/256/{z}/{x}/{y}/2/1_1.png`;
-    L.tileLayer(url, {opacity:0.85, maxZoom:8}).addTo(chaseMap);
+  if(rvTiles.radar){
+    L.tileLayer(`https://tilecache.rainviewer.com${rvTiles.radar}/256/{z}/{x}/{y}/2/1_1.png`,
+      {opacity:0.8,maxZoom:8}).addTo(chaseMap);
   }
-  const icon = L.divIcon({
-    html:`<div style="width:14px;height:14px;border-radius:50%;background:#ef4444;border:2px solid rgba(255,255,255,0.3);box-shadow:0 0 14px #ef4444"></div>`,
-    className:'', iconSize:[14,14], iconAnchor:[7,7]
-  });
-  L.marker([userLat, userLon], {icon}).addTo(chaseMap);
+  addUserMarker(chaseMap,'#ef4444','#ef4444');
+  setTimeout(()=>chaseMap.invalidateSize(),200);
 }
 
-// ══════════════════════════════════════════════════════
-// CHASE MODE
-// ══════════════════════════════════════════════════════
-function activateChase() {
-  const overlay = document.getElementById('chase-overlay');
-  overlay.classList.add('active');
-  setTimeout(() => {
-    initChaseMap();
-    chaseMap.invalidateSize();
-  }, 100);
+function addUserMarker(map,color,shadow){
+  const icon=L.divIcon({
+    html:`<div style="width:12px;height:12px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,0.4);box-shadow:0 0 10px ${shadow}"></div>`,
+    className:'',iconSize:[12,12],iconAnchor:[6,6]
+  });
+  L.marker([uLat,uLon],{icon}).addTo(map);
+}
+
+function setLayer(key){
+  curLayer=key;
+  document.querySelectorAll('#layer-bar .lpill').forEach(p=>p.classList.toggle('active',p.dataset.layer===key));
+  if(wLayer){mainMap.removeLayer(wLayer);wLayer=null;}
+  if(key==='none')return;
+  let url=null;
+  if(key==='rain'&&rvTiles.radar)url=`https://tilecache.rainviewer.com${rvTiles.radar}/256/{z}/{x}/{y}/2/1_1.png`;
+  else if(key==='satellite'&&rvTiles.satellite)url=`https://tilecache.rainviewer.com${rvTiles.satellite}/256/{z}/{x}/{y}/0/0_0.png`;
+  else if(key==='wind')url='https://tile.openweathermap.org/map/wind_new/{z}/{x}/{y}.png?appid=439d4b804bc8187953eb36d2a8c26a02';
+  else if(key==='temp')url='https://tile.openweathermap.org/map/temp_new/{z}/{x}/{y}.png?appid=439d4b804bc8187953eb36d2a8c26a02';
+  else if(key==='clouds')url='https://tile.openweathermap.org/map/clouds_new/{z}/{x}/{y}.png?appid=439d4b804bc8187953eb36d2a8c26a02';
+  else if(key==='pressure')url='https://tile.openweathermap.org/map/pressure_new/{z}/{x}/{y}.png?appid=439d4b804bc8187953eb36d2a8c26a02';
+  if(url){wLayer=L.tileLayer(url,{opacity:0.78,maxZoom:8});wLayer.addTo(mainMap);}
+}
+
+// ══ CHASE ══
+function activateChase(){
+  document.getElementById('chase-ov').classList.add('on');
+  setTimeout(()=>{buildChaseMap();if(chaseMap)chaseMap.invalidateSize();},100);
   updateChaseStats();
 }
-
-function deactivateChase() {
-  document.getElementById('chase-overlay').classList.remove('active');
+function deactivateChase(){document.getElementById('chase-ov').classList.remove('on');}
+function updateChaseStats(){
+  if(!raw)return;
+  const c=raw.current,h=raw.hourly;
+  const mp=Math.max(...(h.precipitation_probability||[]).slice(0,6));
+  document.getElementById('cs-wind').textContent=fmtW(c.wind_speed_10m)+' '+wLbl();
+  document.getElementById('cs-gust').textContent=fmtW(c.wind_gusts_10m)+' '+wLbl();
+  document.getElementById('cs-rain').textContent=mp+'%';
+  document.getElementById('cs-press').textContent=Math.round(c.surface_pressure);
+  const al=[];
+  if([95,96,99].includes(c.weather_code))al.push('ACTIVE THUNDERSTORM DETECTED');
+  if(mpsToMph(c.wind_gusts_10m)>45)al.push('DAMAGING GUSTS: '+fmtW(c.wind_gusts_10m)+' '+wLbl());
+  if(mp>70)al.push('HIGH RAIN PROBABILITY: '+mp+'%');
+  if(c.surface_pressure<995)al.push('VERY LOW PRESSURE: '+Math.round(c.surface_pressure)+' hPa');
+  if(!al.length)al.push('NO ACTIVE WARNINGS — MONITORING LIVE');
+  document.getElementById('chase-alerts').innerHTML=al.map(a=>`<div class="ca">${a}</div>`).join('');
 }
 
-function updateChaseStats() {
-  if (!raw) return;
-  const c = raw.current;
-  const hourly = raw.hourly;
-  const maxProb = Math.max(...(hourly.precipitation_probability||[]).slice(0,6));
-  document.getElementById('cs-wind').textContent = fmtWind(c.wind_speed_10m) + ' ' + windLbl();
-  document.getElementById('cs-gust').textContent = fmtWind(c.wind_gusts_10m) + ' ' + windLbl();
-  document.getElementById('cs-rain').textContent = maxProb + '%';
-  document.getElementById('cs-press').textContent = Math.round(c.surface_pressure);
-
-  const alerts = [];
-  const wmo = c.weather_code;
-  if ([95,96,99].includes(wmo)) alerts.push('ACTIVE THUNDERSTORM DETECTED');
-  if (mpsToMph(c.wind_gusts_10m) > 45) alerts.push('DAMAGING GUST WARNING: ' + fmtWind(c.wind_gusts_10m) + ' ' + windLbl());
-  if (maxProb > 70) alerts.push('HIGH PRECIPITATION PROBABILITY: ' + maxProb + '%');
-  if (c.surface_pressure < 995) alerts.push('VERY LOW PRESSURE: ' + Math.round(c.surface_pressure) + ' hPa');
-  if (alerts.length === 0) alerts.push('NO ACTIVE WARNINGS — MONITORING LIVE');
-
-  document.getElementById('chase-alerts').innerHTML = alerts.map(a =>
-    `<div class="chase-alert-item">${a}</div>`
-  ).join('');
-}
-
-// ══════════════════════════════════════════════════════
-// LIGHTNING (Blitzortung WebSocket)
-// ══════════════════════════════════════════════════════
-let lightningWs = null;
-function connectLightning() {
-  try {
-    // Blitzortung provides open WebSocket feeds
-    const servers = ['ws://ws.blitzortung.org:8080','ws://ws.blitzortung.org:8081','ws://ws.blitzortung.org:8082'];
-    const url = servers[Math.floor(Math.random()*servers.length)];
-    lightningWs = new WebSocket(url);
-    lightningWs.onopen = () => {
-      lightningWs.send(JSON.stringify({west:-180,east:180,north:90,south:-90}));
-      document.getElementById('lightning-status').classList.add('hidden');
-      document.getElementById('strike-count').textContent = '0 strikes';
-    };
-    lightningWs.onmessage = (e) => {
-      try {
-        const d = JSON.parse(e.data);
-        if (d.lat && d.lon) {
-          const dist = haversine(userLat, userLon, d.lat, d.lon);
-          const now = Date.now();
-          strikes.unshift({lat:d.lat, lon:d.lon, dist, time:now});
-          strikes = strikes.slice(0,50); // keep last 50
-          updateLightningUI();
-        }
-      } catch(err){}
-    };
-    lightningWs.onerror = () => showLightningFallback();
-    lightningWs.onclose = () => {
-      // retry after 10s
-      setTimeout(connectLightning, 10000);
-    };
-  } catch(e) { showLightningFallback(); }
-}
-
-function showLightningFallback() {
-  const el = document.getElementById('lightning-status');
-  el.classList.remove('hidden');
-  el.textContent = 'Live lightning data unavailable on this network. Try on mobile data.';
-  document.getElementById('strike-count').textContent = 'Offline';
-}
-
-function haversine(lat1, lon1, lat2, lon2) {
-  const R = 6371;
-  const dLat = (lat2-lat1)*Math.PI/180;
-  const dLon = (lon2-lon1)*Math.PI/180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-
-function updateLightningUI() {
-  const now = Date.now();
-  const recent = strikes.filter(s => now - s.time < 300000); // last 5 min
-  document.getElementById('strike-count').textContent = recent.length + ' in 5 min';
-  const list = document.getElementById('strikes-list');
-  const items = strikes.slice(0,15).map(s => {
-    const age = Math.round((now - s.time)/1000);
-    const ageStr = age < 60 ? age+'s ago' : Math.floor(age/60)+'m ago';
-    const cls = age < 30 ? 'fresh' : age < 120 ? 'recent' : 'old';
-    return `<div class="strike-item">
-      <div class="strike-dot ${cls}"></div>
-      <div class="strike-age">${ageStr}</div>
-      <div class="strike-dist">${distKmToStr(s.dist)} away (${s.lat.toFixed(2)}°, ${s.lon.toFixed(2)}°)</div>
-    </div>`;
-  });
-  if (items.length > 0) {
-    list.innerHTML = items.join('');
-    document.getElementById('lightning-status').classList.add('hidden');
-  }
-}
-
-// ══════════════════════════════════════════════════════
-// CLOUD DATA
-// ══════════════════════════════════════════════════════
-const CLOUDS = [
-  {id:'cumulus',name:'Cumulus',emoji:'⛅',alt:'Low · 500–2,000m',badge:'low',badgeText:'Low Level',
+// ══ CLOUD DATA ══
+const CLOUDS=[
+  {id:'cumulus',n:'Cumulus',e:'⛅',alt:'Low · 500–2,000m',badge:'badge-low',bt:'Low Level',
     desc:'Puffy, cotton-wool clouds with flat bases and rounded tops. Fair-weather cumulus are a sign of a sunny day, but if they grow tall they can develop into thunderstorms.',
-    tags:['Fair weather','Vertical development','Daytime builder'],
-    means:'Generally pleasant conditions. Watch for afternoon growth — if they tower upward, a storm may be developing.'},
-  {id:'cumulonimbus',name:'Cumulonimbus',emoji:'🌩️',alt:'Vertical · up to 12,000m',badge:'vertical',badgeText:'Vertical',
+    means:'Generally pleasant. Watch for afternoon growth — if they tower upward, a storm may be developing.',
+    tags:['Fair weather','Vertical development','Daytime builder']},
+  {id:'cumulonimbus',n:'Cumulonimbus',e:'🌩️',alt:'Vertical · up to 12,000m',badge:'badge-vert',bt:'Vertical',
     desc:'The king of storm clouds. Massive, towering cells that can reach the tropopause. The classic anvil top is a sure sign of an active thunderstorm with lightning, heavy rain and hail.',
-    tags:['Thunderstorm','Lightning','Hail','Anvil top','Most dramatic cloud'],
-    means:'Active or imminent thunderstorm. Treat with respect — these produce lightning, hail, and severe winds.'},
-  {id:'stratus',name:'Stratus',emoji:'🌫️',alt:'Low · 0–600m',badge:'low',badgeText:'Low Level',
-    desc:'A flat, grey featureless sheet covering the sky like a blanket. Often associated with drizzle and grey, dull days. When it touches the ground it becomes fog.',
-    tags:['Grey skies','Drizzle','Fog','Overcast'],
-    means:'Dull, grey conditions. Light drizzle possible. Low visibility — not great for cloud spotting but interesting for fog observers.'},
-  {id:'stratocumulus',name:'Stratocumulus',emoji:'🌥️',alt:'Low · 500–2,000m',badge:'low',badgeText:'Low Level',
-    desc:'The most common cloud type in the world. Lumpy, patchy grey-white cloud in rolls or rounded masses. Usually covers large areas of sky.',
-    tags:['Very common','Patchy cover','Rolls and lumps'],
-    means:'Mostly cloudy with some brightness. Little rain usually, but can occasionally produce light showers.'},
-  {id:'nimbostratus',name:'Nimbostratus',emoji:'🌧️',alt:'Low–Mid · 1,000–3,000m',badge:'low',badgeText:'Low–Mid',
-    desc:'A thick, dark grey cloud layer that produces continuous, steady rain or snow. Unlike a cumulonimbus, it\'s not dramatic — just relentlessly wet.',
-    tags:['Steady rain','Continuous precipitation','Dark grey'],
-    means:'Expect persistent rain or snow. The kind of cloud that settles in for hours.'},
-  {id:'cirrus',name:'Cirrus',emoji:'🌤️',alt:'High · 6,000–12,000m',badge:'high',badgeText:'High Level',
-    desc:'Thin, wispy, silky streaks high in the sky made entirely of ice crystals. Sometimes called "mares\' tails." Often the first sign of an approaching warm front.',
-    tags:['Ice crystals','Wispy','Mares tails','Front approaching'],
-    means:'If spreading and thickening, a warm front and rain may arrive within 12–24 hours. Watch for the sky to slowly fill.'},
-  {id:'altocumulus',name:'Altocumulus',emoji:'⛅',alt:'Mid · 2,000–7,000m',badge:'mid',badgeText:'Mid Level',
-    desc:'Mid-level cloud made of water droplets, appearing as grey-white patches, waves, or rolls. Often beautifully textured. Can indicate instability.',
-    tags:['Mid level','Patches','Waves','Potential instability'],
-    means:'If you see altocumulus on a warm, humid morning, afternoon thunderstorms are a real possibility.'},
-  {id:'altostratus',name:'Altostratus',emoji:'☁️',alt:'Mid · 2,000–7,000m',badge:'mid',badgeText:'Mid Level',
-    desc:'A grey or blue-grey sheet covering the whole sky at mid level. The sun appears as if seen through frosted glass. Precedes nimbostratus and continuous rain.',
-    tags:['Frosted sun','Mid level sheet','Pre-rain'],
-    means:'Rain or snow is likely on its way. The sun\'s "watery" appearance is a classic tell.'},
-  {id:'lenticular',name:'Lenticular',emoji:'🛸',alt:'Low–High · varies',badge:'special',badgeText:'Special',
-    desc:'Stunning, lens or saucer-shaped clouds that form over mountains and high ground. Often mistaken for UFOs. They\'re stationary despite high winds — a truly rare sight.',
-    tags:['Mountain wave','UFO shape','Stationary','Rare'],
-    means:'Strong winds over high ground. If you see one, stop and photograph it — they\'re spectacular and relatively uncommon.'},
-  {id:'mammatus',name:'Mammatus',emoji:'🍇',alt:'Low · under storm anvil',badge:'special',badgeText:'Special',
-    desc:'Extraordinary pouch-like formations hanging from the underside of a cumulonimbus anvil. They form after a severe thunderstorm and are one of nature\'s most dramatic cloud formations.',
-    tags:['Post-storm','Pouches','Dramatic','Severe weather indicator'],
-    means:'Seen after or alongside a severe thunderstorm. If you spot mammatus, the storm was intense. A photographer\'s dream.'},
-  {id:'noctilucent',name:'Noctilucent',emoji:'🌌',alt:'Very High · ~80,000m',badge:'special',badgeText:'Special · Rare',
-    desc:'The highest clouds on Earth, forming at the edge of space from ice crystals. Visible only at twilight in summer at high latitudes, glowing electric blue-white against the darkening sky.',
-    tags:['Edge of space','Electric blue','Twilight only','Summer','Northern UK'],
-    means:'No weather impact — purely one of nature\'s most beautiful phenomena. Look north in June–August around 1–2 hours after sunset.'},
-  {id:'acc-castellanus',name:'Altocumulus Castellanus',emoji:'🏰',alt:'Mid · 2,000–6,000m',badge:'mid',badgeText:'Mid Level',
-    desc:'Altocumulus with tall, turret-like tops reaching upward — like tiny castles. A key storm development indicator: the atmosphere is becoming unstable at mid levels.',
-    tags:['Storm development','Instability indicator','Turret tops'],
-    means:'A serious signal: if you see Acc Castellanus in the morning, severe thunderstorms are likely by afternoon.'},
+    means:'Active or imminent thunderstorm. These produce lightning, hail, and severe winds. Treat with total respect.',
+    tags:['Thunderstorm','Lightning','Hail','Anvil top','Most dramatic cloud']},
+  {id:'stratus',n:'Stratus',e:'🌫️',alt:'Low · 0–600m',badge:'badge-low',bt:'Low Level',
+    desc:'A flat, grey featureless sheet covering the sky like a blanket. Often produces drizzle. When it touches the ground it becomes fog.',
+    means:'Dull grey conditions with possible light drizzle. Low visibility — fascinating for fog and low cloud observers.',
+    tags:['Grey skies','Drizzle','Fog','Overcast']},
+  {id:'stratocumulus',n:'Stratocumulus',e:'🌥️',alt:'Low · 500–2,000m',badge:'badge-low',bt:'Low Level',
+    desc:'The most common cloud in the world. Lumpy, patchy grey-white cloud in rolls or rounded masses covering large areas of sky.',
+    means:'Mostly cloudy with patches of brightness. Little rain usually, but can produce light showers.',
+    tags:['Very common','Patchy','Rolls and lumps']},
+  {id:'nimbostratus',n:'Nimbostratus',e:'🌧️',alt:'Low–Mid · 1,000–3,000m',badge:'badge-low',bt:'Low–Mid',
+    desc:'A thick, dark grey cloud layer that produces continuous, steady rain or snow. Not dramatic — just relentlessly wet.',
+    means:'Expect persistent rain or snow for hours. The settling-in cloud.',
+    tags:['Steady rain','Continuous precipitation','Dark grey']},
+  {id:'cirrus',n:'Cirrus',e:'🌤️',alt:'High · 6,000–12,000m',badge:'badge-high',bt:'High Level',
+    desc:'Thin, wispy, silky streaks high in the sky made entirely of ice crystals. Called "mares\' tails." Often the first sign of an approaching front.',
+    means:'If spreading and thickening, rain may arrive within 12–24 hours. Watch the sky slowly fill.',
+    tags:['Ice crystals','Wispy','Mares tails','Front approaching']},
+  {id:'altocumulus',n:'Altocumulus',e:'⛅',alt:'Mid · 2,000–7,000m',badge:'badge-mid',bt:'Mid Level',
+    desc:'Mid-level cloud in grey-white patches, waves, or rolls. Often beautifully textured. Can indicate instability ahead.',
+    means:'If seen on a warm humid morning, afternoon thunderstorms are a real possibility.',
+    tags:['Mid level','Patches','Waves','Instability signal']},
+  {id:'altostratus',n:'Altostratus',e:'☁️',alt:'Mid · 2,000–7,000m',badge:'badge-mid',bt:'Mid Level',
+    desc:'A grey or blue-grey sheet covering the whole sky at mid level. The sun appears as if seen through frosted glass. Precedes rain.',
+    means:'Rain or snow is likely on its way. The sun\'s watery appearance is the classic tell.',
+    tags:['Frosted sun','Pre-rain','Mid level sheet']},
+  {id:'lenticular',n:'Lenticular',e:'🛸',alt:'Varies with terrain',badge:'badge-spec',bt:'Special',
+    desc:'Stunning lens or saucer-shaped clouds forming over mountains. Often mistaken for UFOs. Stationary despite high winds — a truly rare sight.',
+    means:'Strong winds over high ground. Stop and photograph — they\'re spectacular and relatively uncommon.',
+    tags:['Mountain wave','UFO shape','Stationary','Rare']},
+  {id:'mammatus',n:'Mammatus',e:'🍇',alt:'Under storm anvil',badge:'badge-spec',bt:'Special',
+    desc:'Extraordinary pouch-like formations hanging from the underside of a cumulonimbus anvil. Form after a severe thunderstorm and are one of nature\'s most dramatic formations.',
+    means:'Seen after a severe thunderstorm. If you spot mammatus, the storm was intense. A photographer\'s dream.',
+    tags:['Post-storm','Pouches','Dramatic','Severe weather indicator']},
+  {id:'noctilucent',n:'Noctilucent',e:'🌌',alt:'~80,000m — edge of space',badge:'badge-spec',bt:'Special · Rare',
+    desc:'The highest clouds on Earth, forming at the edge of space from ice crystals. Visible only at twilight in summer at high latitudes, glowing electric blue-white against a darkening sky.',
+    means:'No weather impact — purely one of nature\'s most beautiful phenomena. Look north in June–August around dusk.',
+    tags:['Edge of space','Electric blue','Twilight only','Summer','Northern UK']},
+  {id:'acc',n:'Altocumulus Castellanus',e:'🏰',alt:'Mid · 2,000–6,000m',badge:'badge-mid',bt:'Mid Level',
+    desc:'Altocumulus with tall, turret-like tops — like tiny castles. A key storm development indicator: atmosphere becoming unstable at mid levels.',
+    means:'A serious signal: if seen in the morning, severe thunderstorms are likely by afternoon.',
+    tags:['Storm development','Instability','Turret tops','Morning warning']},
 ];
 
-function buildCloudCards() {
-  const container = document.getElementById('cloud-cards');
-  container.innerHTML = CLOUDS.map(cloud => {
-    const spotted = spottedClouds.includes(cloud.id);
-    return `
-    <div class="cloud-card">
-      <div class="cloud-card-header" onclick="toggleCloud('${cloud.id}')">
-        <div class="cloud-emoji">${cloud.emoji}</div>
-        <div>
-          <div class="cloud-name">${cloud.name}</div>
-          <div class="cloud-alt">${cloud.alt}</div>
-        </div>
-        <div class="cloud-badge ${cloud.badge}">${cloud.badgeText}</div>
+function buildClouds(){
+  document.getElementById('cloud-cards').innerHTML=CLOUDS.map(cl=>{
+    const sp=spotted.includes(cl.id);
+    return`<div class="cc">
+      <div class="cc-hdr" onclick="toggleCloud('${cl.id}')">
+        <div class="cc-emoji">${cl.e}</div>
+        <div><div class="cc-name">${cl.n}</div><div class="cc-alt">${cl.alt}</div></div>
+        <div class="cc-badge ${cl.badge}">${cl.bt}</div>
       </div>
-      <div class="cloud-body" id="cloud-body-${cloud.id}">
-        <p class="cloud-desc">${cloud.desc}</p>
-        <p class="cloud-desc" style="color:var(--muted);font-size:11px;margin-bottom:10px">
-          <strong style="color:var(--rose)">What it means:</strong> ${cloud.means}
-        </p>
-        <div class="cloud-tags">${cloud.tags.map(t=>`<div class="cloud-tag">${t}</div>`).join('')}</div>
-        <button class="cloud-spot-btn ${spotted?'spotted':''}" id="spot-btn-${cloud.id}" onclick="toggleSpotted('${cloud.id}')">
-          ${spotted ? '✓ Spotted!' : 'Mark as spotted'}
-        </button>
+      <div class="cc-body" id="ccb-${cl.id}" style="display:none">
+        <p class="cc-desc">${cl.desc}</p>
+        <p class="cc-means"><strong>What it means:</strong> ${cl.means}</p>
+        <div class="cc-tags">${cl.tags.map(t=>`<div class="cc-tag">${t}</div>`).join('')}</div>
+        <button class="spot-btn${sp?' on':''}" id="sb-${cl.id}" onclick="toggleSpot('${cl.id}')">${sp?'✓ Spotted!':'Mark as spotted'}</button>
       </div>
     </div>`;
   }).join('');
-  updateSpotProgress();
+  updateSpotProg();
 }
 
-function toggleCloud(id) {
-  const body = document.getElementById('cloud-body-' + id);
-  body.classList.toggle('open');
+function toggleCloud(id){
+  const b=document.getElementById('ccb-'+id);
+  b.style.display=b.style.display==='none'?'block':'none';
 }
 
-function toggleSpotted(id) {
-  if (spottedClouds.includes(id)) {
-    spottedClouds = spottedClouds.filter(c => c !== id);
-  } else {
-    spottedClouds.push(id);
-  }
-  localStorage.setItem('sw_spotted', JSON.stringify(spottedClouds));
-  const btn = document.getElementById('spot-btn-' + id);
-  const spotted = spottedClouds.includes(id);
-  btn.classList.toggle('spotted', spotted);
-  btn.textContent = spotted ? '✓ Spotted!' : 'Mark as spotted';
-  updateSpotProgress();
+function toggleSpot(id){
+  if(spotted.includes(id))spotted=spotted.filter(c=>c!==id);
+  else spotted.push(id);
+  localStorage.setItem('sw_spotted',JSON.stringify(spotted));
+  const btn=document.getElementById('sb-'+id);
+  const on=spotted.includes(id);
+  btn.classList.toggle('on',on);
+  btn.textContent=on?'✓ Spotted!':'Mark as spotted';
+  updateSpotProg();
 }
 
-function updateSpotProgress() {
-  const count = spottedClouds.length;
-  const total = CLOUDS.length;
-  document.getElementById('sp-count').textContent = count;
-  document.getElementById('sp-bar').style.width = (count/total*100) + '%';
+function updateSpotProg(){
+  const n=spotted.length,tot=CLOUDS.length;
+  document.getElementById('sp-n').textContent=n;
+  document.getElementById('sp-bar').style.width=(n/tot*100)+'%';
 }
 
-// ══════════════════════════════════════════════════════
-// RENDER
-// ══════════════════════════════════════════════════════
-function renderAll() {
-  if (!raw) return;
-  const {current:c, hourly, daily} = raw;
-  const [cond, icon] = decodeWMO(c.weather_code);
-  const threat = assessThreat(c, hourly);
-  const ctx = smartContext(c, hourly, daily);
+// ══ RENDER ══
+function renderAll(){
+  if(!raw)return;
+  const{current:c,hourly:h,daily:d}=raw;
+  const[cond,icon]=wmo(c.weather_code);
+  const tr=threat(c,h);
+  const ctx=context(c,h);
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const today=new Date();
 
-  // ── HOME ──
-  document.getElementById('h-temp').textContent = fmt(c.temperature_2m);
-  document.getElementById('h-cond').textContent = icon + ' ' + cond;
-  document.getElementById('h-time').textContent = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) + ' · Updated now';
+  // HOME
+  document.getElementById('h-temp').textContent=fmt(c.temperature_2m);
+  document.getElementById('h-cond').textContent=icon+' '+cond;
+  document.getElementById('h-time').textContent=today.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})+' · Updated now';
+  document.getElementById('ctx-i').textContent=ctx.i;
+  document.getElementById('ctx-t').textContent=ctx.t;
+  const te=document.getElementById('h-threat');
+  te.className='threat-strip '+tr.l;
+  document.getElementById('h-te').textContent=tr.e;
+  document.getElementById('h-tt').textContent=tr.t;
+  document.getElementById('h-td').textContent=tr.d;
 
-  // Context banner
-  document.getElementById('ctx-icon').textContent = ctx.icon;
-  document.getElementById('ctx-text').textContent = ctx.text;
-
-  // Threat
-  const tEl = document.getElementById('h-threat');
-  tEl.className = 'threat-strip ' + threat.level;
-  document.getElementById('h-threat-e').textContent = threat.e;
-  document.getElementById('h-threat-t').textContent = threat.t;
-  document.getElementById('h-threat-d').textContent = threat.d;
-
-  // Quick stats
-  const ws = fmtWind(c.wind_speed_10m);
-  const wg = fmtWind(c.wind_gusts_10m);
-  const maxProb = Math.max(...(hourly.precipitation_probability||[]).slice(0,12));
-  document.getElementById('h-stats').innerHTML = [
-    {e:'💨',v:ws,u:windLbl(),l:'Wind'},
+  const ws=fmtW(c.wind_speed_10m);
+  const mp=Math.max(...(h.precipitation_probability||[]).slice(0,12));
+  document.getElementById('h-stats').innerHTML=[
+    {e:'💨',v:ws,u:wLbl(),l:'Wind'},
     {e:'💧',v:c.relative_humidity_2m+'%',u:'',l:'Humidity'},
-    {e:'🌧️',v:maxProb+'%',u:'',l:'Rain'},
+    {e:'🌧️',v:mp+'%',u:'',l:'Rain'},
     {e:'📊',v:Math.round(c.surface_pressure),u:'hPa',l:'Pressure'},
-  ].map(s=>`<div class="qs-card"><div class="qs-icon">${s.e}</div><div class="qs-val">${s.v}<span class="qs-unit">${s.u}</span></div><div class="qs-label">${s.l}</div></div>`).join('');
+  ].map(s=>`<div class="qs"><div class="qs-i">${s.e}</div><div class="qs-v">${s.v}<span class="qs-u">${s.u}</span></div><div class="qs-l">${s.l}</div></div>`).join('');
 
   // Hourly
-  const track = document.getElementById('h-hourly');
-  track.innerHTML = '';
-  const nowH = new Date().getHours();
-  for (let i=0;i<24;i++) {
-    const h = (nowH+i)%24;
-    const lbl = i===0?'Now':h===0?'12a':h<12?h+'a':h===12?'12p':(h-12)+'p';
-    const wmoH = (hourly.weather_code||[])[i];
-    const prob = (hourly.precipitation_probability||[])[i]||0;
-    const tmp = fmt((hourly.temperature_2m||[])[i]||0);
-    const [,ico] = decodeWMO(wmoH);
-    const isStorm = [95,96,99].includes(wmoH);
-    const isRain = prob>30;
-    const el = document.createElement('div');
-    el.className='h-card'+(i===0?' now':isStorm?' storm':isRain?' rain':'');
-    el.innerHTML=`${i===0?'<div class="now-pip"></div>':''}
-      <div class="h-time">${lbl}</div>
-      <div class="h-icon">${ico}</div>
-      <div class="h-temp">${tmp}°</div>
-      ${prob>10?`<div class="h-rain">${prob}%</div>`:''}`;
+  const track=document.getElementById('h-hourly');
+  track.innerHTML='';
+  const nowH=today.getHours();
+  for(let i=0;i<24;i++){
+    const hr=(nowH+i)%24;
+    const lbl=i===0?'Now':hr===0?'12a':hr<12?hr+'a':hr===12?'12p':(hr-12)+'p';
+    const wc=(h.weather_code||[])[i],pr=(h.precipitation_probability||[])[i]||0,tp=fmt((h.temperature_2m||[])[i]||0);
+    const[,ico]=wmo(wc);
+    const isS=[95,96,99].includes(wc),isR=pr>30;
+    const el=document.createElement('div');
+    el.className='hc'+(i===0?' now':isS?' storm':isR?' rain':'');
+    el.innerHTML=`${i===0?'<div class="now-pip"></div>':''}<div class="hc-time">${lbl}</div><div class="hc-icon">${ico}</div><div class="hc-temp">${tp}°</div>${pr>10?`<div class="hc-rain">${pr}%</div>`:''}`;
     track.appendChild(el);
   }
 
-  // Daily (home)
-  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  const today = new Date();
-  document.getElementById('h-daily').innerHTML = [0,1,2,3,4,5,6].map(i=>{
-    const d=new Date(today);d.setDate(today.getDate()+i);
-    const name=i===0?'Today':days[d.getDay()];
-    const wmoD=(daily.weather_code||[])[i];
-    const [desc,ico]=decodeWMO(wmoD);
-    const hi=fmt((daily.temperature_2m_max||[])[i]||0);
-    const lo=fmt((daily.temperature_2m_min||[])[i]||0);
-    const prec=Math.round((daily.precipitation_probability_max||[])[i]||0);
-    const isStorm=[95,96,99].includes(wmoD);
-    const isRain=prec>40;
-    return `<div class="day-row${isStorm?' storm-day':isRain?' rain-day':''}">
-      <div class="day-name">${name}</div>
-      <div class="day-icon">${ico}</div>
-      <div class="day-desc">${desc}</div>
-      <div class="day-precip${prec<10?' dry':''}">${prec>0?prec+'%':'—'}</div>
-      <div class="day-temps"><div class="day-hi">${hi}°</div><div class="day-lo">${lo}°</div></div>
+  // Daily helper
+  const makeDayRow=(i,extraClass='')=>{
+    const dt=new Date(today);dt.setDate(today.getDate()+i);
+    const name=i===0?'Today':days[dt.getDay()];
+    const wc=(d.weather_code||[])[i],hi=fmt((d.temperature_2m_max||[])[i]||0),lo=fmt((d.temperature_2m_min||[])[i]||0);
+    const pr=Math.round((d.precipitation_probability_max||[])[i]||0);
+    const[desc,ico]=wmo(wc);
+    const isS=[95,96,99].includes(wc),isR=pr>40;
+    return`<div class="dr${isS?' sd':isR?' rd':''}${extraClass}">
+      <div class="dn">${name}</div><div class="di">${ico}</div>
+      <div class="dd">${desc}</div>
+      <div class="dp${pr<10?' dry':''}">${pr>0?pr+'%':'—'}</div>
+      <div class="dt"><div class="dt-hi">${hi}°</div><div class="dt-lo">${lo}°</div></div>
     </div>`;
-  }).join('');
+  };
+  document.getElementById('h-daily').innerHTML=[0,1,2,3,4,5,6].map(i=>makeDayRow(i)).join('');
+  document.getElementById('storm-daily').innerHTML=[0,1,2,3,4,5,6].map(i=>makeDayRow(i)).join('');
 
-  // ── MAP ──
-  document.getElementById('map-loc').textContent = document.getElementById('h-loc').textContent;
-  document.getElementById('map-cond').textContent = icon + ' ' + cond;
-  document.getElementById('map-temp').textContent = fmtU(c.temperature_2m);
+  // MAP
+  document.getElementById('map-loc').textContent=document.getElementById('h-loc').textContent;
+  document.getElementById('map-cond').textContent=icon+' '+cond;
+  document.getElementById('map-temp').textContent=fmtU(c.temperature_2m);
 
-  // ── STORM ──
-  const gust = fmtWind(c.wind_gusts_10m);
-  const vis = unit==='F' ? ((c.visibility||10000)/1000*0.621).toFixed(1)+' mi' : ((c.visibility||10000)/1000).toFixed(1)+' km';
-  const hasThunder = [95,96,99].includes(c.weather_code) || (hourly.weather_code||[]).slice(0,24).some(x=>[95,96,99].includes(x));
-  const pressStr = Math.round(c.surface_pressure);
-  const pressDesc = pressStr<995?'Very low — deep low system':pressStr<1005?'Below normal — unsettled':pressStr<1020?'Normal':'High — stable';
-
-  document.getElementById('storm-metrics').innerHTML = [
-    {e:'💨',n:'Wind Speed',d:'Surface winds',v:ws,u:windLbl(),cls:ws>40?'danger':ws>25?'warn':''},
-    {e:'🌬️',n:'Wind Gusts',d:'Peak gust speed',v:gust,u:windLbl(),cls:parseInt(gust)>45?'danger':parseInt(gust)>30?'warn':''},
-    {e:'🌧️',n:'Rain Probability',d:'Next 12 hours',v:maxProb+'%',u:'',cls:maxProb>70?'danger':maxProb>40?'warn':''},
-    {e:'⛈️',n:'Thunder Risk',d:hasThunder?'Active in area':'Based on conditions',v:hasThunder?'Active':'Low',u:'',cls:hasThunder?'danger':'good'},
+  // STORM metrics
+  const gust=fmtW(c.wind_gusts_10m);
+  const vis=unit==='F'?((c.visibility||10000)/1000*0.621).toFixed(1)+' mi':((c.visibility||10000)/1000).toFixed(1)+' km';
+  const hasT=[95,96,99].includes(c.weather_code)||(h.weather_code||[]).slice(0,24).some(x=>[95,96,99].includes(x));
+  const pr2=Math.round(c.surface_pressure);
+  const prDesc=pr2<995?'Very low — deep low system':pr2<1005?'Below normal — unsettled':pr2<1020?'Normal':'High — stable';
+  document.getElementById('storm-metrics').innerHTML=[
+    {e:'💨',n:'Wind Speed',d:'Surface winds',v:ws,u:wLbl(),cls:ws>40?'danger':ws>25?'warn':''},
+    {e:'🌬️',n:'Wind Gusts',d:'Peak gust speed',v:gust,u:wLbl(),cls:parseInt(gust)>45?'danger':parseInt(gust)>30?'warn':''},
+    {e:'🌧️',n:'Rain Probability',d:'Next 12 hours',v:mp+'%',u:'',cls:mp>70?'danger':mp>40?'warn':''},
+    {e:'⛈️',n:'Thunder Risk',d:hasT?'Active in area':'Based on conditions',v:hasT?'Active':'Low',u:'',cls:hasT?'danger':'good'},
     {e:'👁️',n:'Visibility',d:'Surface visibility',v:vis,u:'',cls:''},
-    {e:'📊',n:'Pressure',d:pressDesc,v:pressStr,u:'hPa',cls:pressStr<1000?'warn':''},
+    {e:'📊',n:'Pressure',d:prDesc,v:pr2,u:'hPa',cls:pr2<1000?'warn':''},
     {e:'💧',n:'Humidity',d:c.relative_humidity_2m>80?'Very humid':c.relative_humidity_2m>60?'Humid':'Comfortable',v:c.relative_humidity_2m+'%',u:'',cls:''},
-    {e:'🌡️',n:'Apparent Temp',d:'Feels like',v:fmtU(c.apparent_temperature),u:'',cls:''},
-  ].map(m=>`
-    <div class="sm-row">
-      <div class="sm-left">
-        <div class="sm-icon">${m.e}</div>
-        <div><div class="sm-name">${m.n}</div><div class="sm-desc">${m.d}</div></div>
-      </div>
-      <div><div class="sm-val ${m.cls}">${m.v}</div><div class="sm-unit">${m.u}</div></div>
-    </div>`).join('');
+    {e:'🌡️',n:'Feels Like',d:'Apparent temperature',v:fmtU(c.apparent_temperature),u:'',cls:''},
+  ].map(m=>`<div class="sm">
+    <div class="sm-left"><div class="sm-icon">${m.e}</div><div><div class="sm-name">${m.n}</div><div class="sm-desc">${m.d}</div></div></div>
+    <div><div class="sm-val ${m.cls}">${m.v}</div><div class="sm-unit">${m.u}</div></div>
+  </div>`).join('');
 
-  // Storm daily
-  document.getElementById('storm-daily').innerHTML = [0,1,2,3,4,5,6].map(i=>{
-    const d=new Date(today);d.setDate(today.getDate()+i);
-    const name=i===0?'Today':days[d.getDay()];
-    const wmoD=(daily.weather_code||[])[i];
-    const [desc,ico]=decodeWMO(wmoD);
-    const hi=fmt((daily.temperature_2m_max||[])[i]||0);
-    const lo=fmt((daily.temperature_2m_min||[])[i]||0);
-    const prec=Math.round((daily.precipitation_probability_max||[])[i]||0);
-    const isStorm=[95,96,99].includes(wmoD);
-    return `<div class="day-row${isStorm?' storm-day':''}">
-      <div class="day-name">${name}</div>
-      <div class="day-icon">${ico}</div>
-      <div class="day-desc">${desc}</div>
-      <div class="day-precip${prec<10?' dry':''}">${prec>0?prec+'%':'—'}</div>
-      <div class="day-temps"><div class="day-hi">${hi}°</div><div class="day-lo">${lo}°</div></div>
-    </div>`;
-  }).join('');
-
-  document.getElementById('storm-updated').textContent = 'Live · Updated ' + new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('storm-upd').textContent='Live · Updated '+today.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
   updateChaseStats();
 
-  // Update radar iframes with user location
-  document.getElementById('radar-iframe').src =
-    `https://www.rainviewer.com/map.html?loc=${userLat.toFixed(2)},${userLon.toFixed(2)},5&oFa=0&oC=0&oU=0&oCS=1&oF=0&oAP=0&rmt=4&c=1&o=83&lm=1&layer=radar&sm=1&sn=1`;
+  // RADAR iframes — set to user location
+  const lat=uLat.toFixed(2),lon=uLon.toFixed(2);
+  document.getElementById('radar-rain-iframe').src=
+    `https://www.rainviewer.com/map.html?loc=${lat},${lon},6&oFa=0&oC=0&oU=0&oCS=1&oF=0&oAP=0&rmt=4&c=1&o=83&lm=1&layer=radar&sm=1&sn=1`;
+  document.getElementById('radar-sat-iframe').src=
+    `https://www.rainviewer.com/map.html?loc=${lat},${lon},4&oFa=0&oC=0&oU=0&oCS=1&oF=0&oAP=0&rmt=4&c=1&o=83&lm=1&layer=satellite&sm=1&sn=1`;
 }
 
-// ══════════════════════════════════════════════════════
-// FETCH WEATHER
-// ══════════════════════════════════════════════════════
-async function fetchWeather(lat, lon) {
-  const url = `https://api.open-meteo.com/v1/forecast?` +
-    `latitude=${lat}&longitude=${lon}` +
-    `&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,` +
-    `wind_speed_10m,wind_direction_10m,wind_gusts_10m,surface_pressure,visibility` +
-    `&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_gusts_10m` +
-    `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max` +
+// ══ FETCH ══
+async function fetchWeather(lat,lon){
+  const url=`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`+
+    `&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,`+
+    `wind_speed_10m,wind_direction_10m,wind_gusts_10m,surface_pressure,visibility`+
+    `&hourly=temperature_2m,precipitation_probability,precipitation,weather_code,wind_speed_10m,wind_gusts_10m`+
+    `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max`+
     `&wind_speed_unit=ms&forecast_days=7&timezone=auto`;
-  const r = await fetch(url);
-  if (!r.ok) throw new Error('API ' + r.status);
+  const r=await fetch(url);if(!r.ok)throw new Error(r.status);
   return r.json();
 }
 
-async function reverseGeocode(lat, lon) {
-  try {
-    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
-    const d = await r.json();
-    return d.address?.city || d.address?.town || d.address?.village || d.address?.county || 'Your Location';
-  } catch { return 'Your Location'; }
+async function geocode(lat,lon){
+  try{
+    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+    const d=await r.json();
+    return d.address?.city||d.address?.town||d.address?.village||d.address?.county||'Your Location';
+  }catch{return'Your Location';}
 }
 
-// ══════════════════════════════════════════════════════
-// INIT
-// ══════════════════════════════════════════════════════
-async function initApp() {
-  document.getElementById('load-error').classList.add('hidden');
-  document.getElementById('load-spinner').classList.remove('hidden');
+// ══ INIT ══
+async function initApp(){
+  document.getElementById('load-err').classList.add('hidden');
+  document.getElementById('load-spin').classList.remove('hidden');
+  document.getElementById('btnF').classList.toggle('active',unit==='F');
+  document.getElementById('btnC').classList.toggle('active',unit==='C');
 
-  // Restore unit
-  document.getElementById('btnF').classList.toggle('active', unit==='F');
-  document.getElementById('btnC').classList.toggle('active', unit==='C');
+  if(!navigator.geolocation){showErr('GPS not available','Your browser doesn\'t support location.');return;}
 
-  navigator.geolocation.getCurrentPosition(async pos => {
-    userLat = pos.coords.latitude;
-    userLon = pos.coords.longitude;
-
-    try {
-      const [weather, place, _rv] = await Promise.all([
-        fetchWeather(userLat, userLon),
-        reverseGeocode(userLat, userLon),
-        loadRainViewerTimes(),
-      ]);
-
-      raw = weather;
-      document.getElementById('h-loc').textContent = place;
-
-      // Build static content
-      buildCloudCards();
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    uLat=pos.coords.latitude;uLon=pos.coords.longitude;
+    try{
+      const[weather,place]=await Promise.all([fetchWeather(uLat,uLon),geocode(uLat,uLon),loadRV()]);
+      raw=weather;
+      document.getElementById('h-loc').textContent=place;
+      buildClouds();
       restoreSections();
-
-      // Init map
-      initMap();
-
-      // Render data
+      buildMap();
       renderAll();
-
-      // Show app
       document.getElementById('loading').classList.add('hidden');
       document.getElementById('home').classList.add('active');
       document.getElementById('home-nav').classList.add('active');
-
-      // Connect lightning
-      connectLightning();
-
-      // Auto-refresh every 10 min
-      setInterval(async () => {
-        try {
-          raw = await fetchWeather(userLat, userLon);
-          await loadRainViewerTimes();
-          renderAll();
-          if (currentLayer !== 'none') setLayer(currentLayer);
-        } catch(e){}
-      }, 600000);
-
-    } catch(e) {
-      showErr('Couldn\'t load weather', 'Check your connection and try again.');
-    }
-  }, err => {
-    if (err.code === 1) showErr('Location access denied', 'Allow location access in your browser settings and try again.');
-    else showErr('Location unavailable', 'GPS signal lost. Please try again.');
-  }, {timeout:15000, enableHighAccuracy:false});
+      setInterval(async()=>{
+        try{raw=await fetchWeather(uLat,uLon);await loadRV();renderAll();if(curLayer!=='none')setLayer(curLayer);}catch(e){}
+      },600000);
+    }catch(e){showErr('Couldn\'t load weather','Check your connection and try again.');}
+  },err=>{
+    if(err.code===1)showErr('Location denied','Allow location access in Safari Settings → StormWatch → Location.');
+    else showErr('Location unavailable','GPS signal lost. Please try again.');
+  },{timeout:15000,enableHighAccuracy:false});
 }
 
-function showErr(title, msg) {
-  document.getElementById('load-spinner').classList.add('hidden');
-  document.getElementById('err-title').textContent = title;
-  document.getElementById('err-msg').textContent = msg;
-  document.getElementById('load-error').classList.remove('hidden');
+function showErr(t,m){
+  document.getElementById('load-spin').classList.add('hidden');
+  document.getElementById('err-t').textContent=t;
+  document.getElementById('err-m').textContent=m;
+  document.getElementById('load-err').classList.remove('hidden');
 }
 
 initApp();
